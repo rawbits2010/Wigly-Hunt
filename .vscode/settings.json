@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "worm.h": "c",
+        "tonc.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "Disabled"
+}
