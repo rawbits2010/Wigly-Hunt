@@ -1,45 +1,131 @@
 #include <tonc.h>
+#include <string.h>
+#include "sprite.h"
+#include "sprite_buffer.h"
 
+// gfx data
 #include "worm.h"
+#include "fish_1_A.h"
+#include "fish_1_B.h"
+#include "platform.h"
 
 
 OBJ_ATTR obj_buffer[128];
 OBJ_AFFINE *obj_aff_buffer= (OBJ_AFFINE*)obj_buffer;
 
 
+void handleInput( Sprite *obj ) {
+
+	key_poll();
+
+	u32 force_x = 0;
+	u32 force_y = 0;
+
+	force_x += 1*key_tri_horz();
+	force_y += 1*key_tri_vert();
+
+	obj->pos_x += force_x;
+	obj->pos_y += force_y;
+
+	if( key_hit(KEY_A) ) {
+		obj->curr_frame = 1;
+	} else {
+		obj->curr_frame = 0;
+	}
+
+	spriteSetAnimationFrame( obj );
+	spriteSetPosition( obj );
+
+}
+
 int main() {
 
-	// Places the glyphs of a 4bpp boxed metroid sprite 
-	//   into LOW obj memory (cbb == 4)
-	memcpy(&tile_mem[4][0], wormTiles, wormTilesLen);
-	memcpy(pal_obj_mem, wormPal, wormPalLen);
+	// create sprites
+	Sprite worm; // 16x16@4
+	worm.tiles = wormTiles;
+	worm.tile_size = 32;
+	worm.tiles_per_frame = 4;
+	worm.frame_count = 2;
+	worm.palette = wormPal;
+	worm.palette_startidx = 0;
+	worm.palette_count = 16;	// use only the first 16 colors
+	worm.curr_frame = 1;
 
-	oam_init(obj_buffer, 128);
-	REG_DISPCNT= DCNT_OBJ | DCNT_OBJ_1D;
+	// create sprites
+	Sprite fish1A; // 16x16@4
+	fish1A.tiles = fish_1_ATiles;
+	fish1A.tile_size = 32;
+	fish1A.tiles_per_frame = 4;
+	fish1A.frame_count = 1;
+	fish1A.palette = fish_1_APal;
+	fish1A.palette_startidx = 0;
+	fish1A.palette_count = 16;	// use only the first 16 colors
+	fish1A.curr_frame = 0;
+	Sprite fish1B; // 16x16@4
+	fish1B.tiles = fish_1_BTiles;
+	fish1B.tile_size = 32;
+	fish1B.tiles_per_frame = 4;
+	fish1B.frame_count = 1;
+	fish1B.palette = fish_1_BPal;
+	fish1B.palette_startidx = 0;
+	fish1B.palette_count = 16;	// use only the first 16 colors
+	fish1B.curr_frame = 0;
+
+	// load gfx
+	spriteLoadTiles( &worm );
+	spriteLoadPalette( &worm );
+	spriteLoadTiles( &fish1A );
+	spriteLoadPalette( &fish1A );
+	spriteLoadTiles( &fish1B );
+	spriteLoadPalette( &fish1B );
+
+// Load palette
+    memcpy(&pal_bg_mem[16], platformPal, 16*2);
+    // Load tiles into CBB 0
+    memcpy(&tile_mem[0][1], platformTiles, platformTilesLen);
+	memset16(&se_mem[30][0], (SE_PALBANK(1) | 1), 64*32);
+	//pal_bg_mem[0] = 0x7FAE;
+
+	// init graphics mode
+	spritebufferInit();
+	REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
+	REG_BG0CNT= BG_CBB(0) | BG_SBB(30) | BG_4BPP | BG_REG_64x32;
+
+	// add sprites to the buffer
+	spritebufferAddSprite( &worm );
+	spritebufferAddSprite( &fish1A );
+	spritebufferAddSprite( &fish1B );
 
 	// enable isr switchboard and VBlank interrupt
 	irq_init(NULL);
 	irq_add(II_VBLANK, NULL);
 
-	int x= 96, y= 32;
-	u32 tid= 0, pb= 0;		// tile id, pal-bank
+	// position the worm
+	worm.pos_x = 96;
+	worm.pos_y = 32;
+	spriteSetPosition( &worm );
+	fish1A.pos_x = 96;
+	fish1A.pos_y = 64;
+	spriteSetPosition( &fish1A );
+	fish1B.pos_x = 96+16;
+	fish1B.pos_y = 64;
+	spriteSetPosition( &fish1B );
 
-	OBJ_ATTR *worm= &obj_buffer[0];
-	obj_set_attr(worm, 
-		ATTR0_SQUARE,				// Square, regular sprite
-		ATTR1_SIZE_16,					// 64x64p, 
-		ATTR2_PALBANK(pb) | tid);		// palbank 0, tile 0
-
-	// position sprite (redundant here; the _real_ position
-	// is set further down
-	obj_set_pos(worm, x, y);
-
-
+	u32 v = 0;
 	while(1) {
 
 		VBlankIntrWait();
 
-		oam_copy(oam_mem, obj_buffer, 1);
+		REG_BG0VOFS= v++;
+
+		handleInput( &worm );
+
+		fish1A.pos_x -= 1;
+		spriteSetPosition( &fish1A );
+		fish1B.pos_x -= 1;
+		spriteSetPosition( &fish1B );
+
+		spritebufferUpload(3);
 
 	}
 

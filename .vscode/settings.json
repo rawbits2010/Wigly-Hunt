@@ -1,7 +1,16 @@
 {
     "files.associations": {
-        "worm.h": "c",
-        "tonc.h": "c"
-    },
-    "C_Cpp.errorSquiggles": "Disabled"
+		"tonc.h": "c",
+		"tonc_memmap.h": "c",
+		"tonc_types.h": "c"
+	},
+    "terminal.integrated.shell.windows": "C:\\devkitPro\\msys2\\msys2_shell.bat",
+    "terminal.integrated.shellArgs.windows": [
+        "-where",
+        "${workspaceFolder}"
+    ],
+    "terminal.integrated.env.windows": {
+        "MSYSTEM": "MINGW64",
+        "CHERE_INVOKING":"1"
+    }
 }

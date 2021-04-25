@@ -1,22 +1,17 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "GBA",
             "includePath": [
-                "${workspaceFolder}/**",
                 "C:\\devkitPro\\libtonc\\include",
-                "D:\\GBA\\LD48_48\\**"
+                "C:\\devkitPro\\msys2\\usr\\include\\**",
+                "C:\\devkitPro\\devkitARM\\lib\\gcc\\arm-none-eabi\\10.2.0\\include\\**",
+                "${workspaceFolder}\\**"
             ],
             "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
             ],
-            "windowsSdkVersion": "10.0.18362.0",
-            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx64/x64/cl.exe",
             "cStandard": "c17",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "windows-msvc-x64"
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4
