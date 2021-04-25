@@ -41,16 +41,14 @@ inline bool animationAdvance( Animation *obj ) {
 
 			obj->curr_frame_idx += obj->pong_dir;
 			if( obj->pong_dir > 0 ) {
-				if( obj->curr_frame_idx >= obj->frame_count ) {
+				if( obj->curr_frame_idx >= obj->frame_count-1 ) {
 
-					obj->curr_frame_idx = 0;
 					obj->pong_dir *= -1;
 
 				}
 			} else {
-				if( obj->curr_frame_idx < 0 ) {
+				if( obj->curr_frame_idx <= 0 ) {
 
-					obj->curr_frame_idx = obj->curr_frame_count;
 					obj->pong_dir *= -1;
 
 					if( !obj->do_loop ) {
@@ -63,7 +61,7 @@ inline bool animationAdvance( Animation *obj ) {
 		} else {
 
 			obj->curr_frame_idx++;
-			if( obj->curr_frame_idx >= obj->frame_count ) {
+			if( obj->curr_frame_idx >= obj->frame_count-1 ) {
 
 				obj->curr_frame_idx = 0;
 
@@ -83,6 +81,7 @@ inline void animationReset( Animation *obj ) {
 
 	obj->curr_frame_count = 0;
 	obj->curr_frame_idx = 0;
+	
 	obj->done = false;
 
 	if( obj->do_pong ) {

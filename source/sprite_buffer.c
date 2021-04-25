@@ -12,13 +12,11 @@ inline void spritebufferInit() {
 
 inline void spritebufferAddSprite( Sprite *obj ) {
 	obj->obj_attr = &obj_buffer[first_free_sprite_idx++];
+	
+	obj->obj_attr->attr0 = ATTR0_SQUARE;
+	obj->obj_attr->attr1 = ATTR1_SIZE_16;
 
 	spriteSetAnimationFrame(obj, obj->default_anim_idx); // ugly but does just what we need
-	
-	obj_set_attr(obj->obj_attr, 
-		ATTR0_SQUARE,						// Square, regular sprite
-		ATTR1_SIZE_16,						// 16x16p, 
-		0);	// palbank, starting tile
 
 }
 

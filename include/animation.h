@@ -28,7 +28,7 @@ typedef struct Animation {
 
 	// by default, animation is looping
 	bool do_pong;	// this can override and make it go ping-pong
-	u32 pong_dir;	// handled internally (+1 or -1) (2 bits)
+	s32 pong_dir;	// handled internally (+1 or -1) (2 bits)
 
 	// positioning this animation from the base anim
 	s32 h_offset;
