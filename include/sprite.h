@@ -26,13 +26,21 @@ typedef struct Sprite {
 	u32 pos_y;		// storing y position on screen
 
 	bool h_mirror;
+	bool hidden;
 
 } Sprite;
+
+
+extern void spriteCopySprite( Sprite *src, Sprite *dst );
+
+// like having cloned sprites with exactly the same animation
+extern void spriteUpdateGfx( Sprite *obj );
 
 extern void spriteLoadPalette( Sprite *obj );
 
 extern void spriteSetPosition( Sprite *obj );
 extern void spriteSetHFlipped( Sprite *obj, bool state );
+extern void spriteSetHidden( Sprite *obj, bool hide );
 
 extern void spriteSetAnimationFrame( Sprite *obj, u32 anim_idx );
 extern void spriteAdvanceAnimation( Sprite *obj );

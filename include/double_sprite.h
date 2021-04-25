@@ -19,9 +19,15 @@ typedef struct DoubleSprite {
 	// need to change the sides and also flip
 	bool h_mirror;
 
+	// not on screen
+	bool hidden;
+
 } DoubleSprite;
 
+extern void doublespriteCopy( DoubleSprite *src, DoubleSprite *dst );
+extern void doublespriteUpdateGfx( DoubleSprite *obj );
 
+extern void doublespriteSetHidden( DoubleSprite *obj, bool hide );
 extern void doublespriteSetHFlipped( DoubleSprite *obj, bool state );
 extern void doublespriteSetPosition( DoubleSprite *obj );
 

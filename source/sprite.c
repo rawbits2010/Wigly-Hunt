@@ -16,12 +16,28 @@ static u32 s_LoadPalette( const unsigned short *palette, u32 from_idx, u32 count
 }
 
 
-
-
 static void s_SetGfx( OBJ_ATTR *obj_attr, u32 tile_id, u32 pal_id ) {
 	obj_attr->attr2 = ATTR2_PALBANK(pal_id) | tile_id;
 }
 
+
+void spriteCopySprite( Sprite *src, Sprite *dst ) {
+	
+	dst->anims = src->anims;
+	dst->default_anim_idx = src->default_anim_idx;
+	dst->curr_anim_idx = src->curr_anim_idx;
+
+	dst->palette = src->palette;
+	dst->palette_startidx = src->palette_startidx;
+	dst->palmem_start_idx = src->palmem_start_idx;
+
+	spriteUpdateGfx( dst );
+}
+
+void spriteUpdateGfx( Sprite *obj ) {
+	Animation *curr_anim = &obj->anims[obj->curr_anim_idx];
+	s_SetGfx(obj->obj_attr, curr_anim->tilemem_start_idx + (curr_anim->curr_frame_idx * curr_anim->tiles_per_frame), obj->palmem_start_idx);
+}
 
 
 inline void spriteLoadPalette( Sprite *obj ) {
@@ -40,6 +56,15 @@ inline void spriteSetHFlipped( Sprite *obj, bool state ) {
 	} else {
 		obj->obj_attr->attr1 &= ~ATTR1_HFLIP;
 	}
+}
+
+inline void spriteSetHidden( Sprite *obj, bool hide ) {
+	if( hide ) {
+		obj_hide( obj->obj_attr );
+	} else {
+		obj_unhide( obj->obj_attr, ATTR0_SQUARE );
+	}
+	obj->hidden = hide;
 }
 
 inline void spriteSetAnimationFrame( Sprite *obj, u32 anim_idx ) {

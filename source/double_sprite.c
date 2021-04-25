@@ -1,10 +1,28 @@
 #include "double_sprite.h"
 
 
+inline void doublespriteCopy( DoubleSprite *src, DoubleSprite *dst ) {
+	spriteCopySprite(src->left, dst->left);
+	spriteCopySprite(src->right, dst->right);
+}
+
+inline void doublespriteUpdateGfx( DoubleSprite *obj ) {
+	spriteUpdateGfx(obj->left);
+	spriteUpdateGfx(obj->right);
+}
+
+inline void doublespriteSetHidden( DoubleSprite *obj, bool hide ) {
+
+	spriteSetHidden( obj->left, hide );
+	spriteSetHidden( obj->right, hide );
+	obj->hidden = hide;
+
+}
+
 inline void doublespriteSetHFlipped( DoubleSprite * obj, bool state ) {
 
 	// change their side so set position will work correctly
-	if( obj->h_mirror == state ) {
+	if( obj->h_mirror != state ) {
 
 		Sprite *temp = obj->left;
 		obj->left = obj->right;
