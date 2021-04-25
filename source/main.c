@@ -5,6 +5,7 @@
 
 // gfx data
 #include "worm.h"
+#include "worm_hit.h"
 #include "fish_1_A.h"
 #include "fish_1_B.h"
 #include "platform.h"
@@ -28,29 +29,46 @@ void handleInput( Sprite *obj ) {
 	obj->pos_y += force_y;
 
 	if( key_hit(KEY_A) ) {
-		obj->curr_frame = 1;
-	} else {
-		obj->curr_frame = 0;
+		spriteSetAnimationFrame( obj, 1 );
 	}
 
-	spriteSetAnimationFrame( obj );
+//	spriteSetAnimationFrame( obj );
+	spriteAdvanceAnimation( obj );
 	spriteSetPosition( obj );
 
 }
 
 int main() {
 
-	// create sprites
-	Sprite worm; // 16x16@4
-	worm.tiles = wormTiles;
-	worm.tile_size = 32;
-	worm.tiles_per_frame = 4;
-	worm.frame_count = 2;
+	// create the worm sprite with animations
+	Animation worm_anims[2];
+
+	Animation worm_wiggle; // 16x16@4
+	worm_wiggle.tiles = wormTiles;
+	worm_wiggle.tile_size = 32;
+	worm_wiggle.tiles_per_frame = 4;
+	worm_wiggle.frame_count = 4;
+	animationInit(&worm_wiggle, 15, true, false);
+
+	worm_anims[0] = worm_wiggle;
+
+	Animation worm_hit; // 16x16@4
+	worm_hit.tiles = worm_hitTiles;
+	worm_hit.tile_size = 32;
+	worm_hit.tiles_per_frame = 4;
+	worm_hit.frame_count = 4;
+	animationInit(&worm_hit, 4, false, false);
+
+	worm_anims[1] = worm_hit;
+
+	Sprite worm;
+	worm.anims = &worm_anims[0];
+	worm.default_anim = 0;
 	worm.palette = wormPal;
 	worm.palette_startidx = 0;
 	worm.palette_count = 16;	// use only the first 16 colors
-	worm.curr_frame = 1;
-
+	spriteSetAnimationFrame( &worm, 0 );
+/*
 	// create sprites
 	Sprite fish1A; // 16x16@4
 	fish1A.tiles = fish_1_ATiles;
@@ -70,14 +88,14 @@ int main() {
 	fish1B.palette_startidx = 0;
 	fish1B.palette_count = 16;	// use only the first 16 colors
 	fish1B.curr_frame = 0;
-
+*/
 	// load gfx
-	spriteLoadTiles( &worm );
-	spriteLoadPalette( &worm );
+	//animationLoadTiles( &worm_wiggle );
+	spriteLoadPalette( &worm );/*
 	spriteLoadTiles( &fish1A );
 	spriteLoadPalette( &fish1A );
 	spriteLoadTiles( &fish1B );
-	spriteLoadPalette( &fish1B );
+	spriteLoadPalette( &fish1B );*/
 
 // Load palette
     memcpy(&pal_bg_mem[16], platformPal, 16*2);
@@ -92,9 +110,9 @@ int main() {
 	REG_BG0CNT= BG_CBB(0) | BG_SBB(30) | BG_4BPP | BG_REG_64x32;
 
 	// add sprites to the buffer
-	spritebufferAddSprite( &worm );
+	spritebufferAddSprite( &worm );/*
 	spritebufferAddSprite( &fish1A );
-	spritebufferAddSprite( &fish1B );
+	spritebufferAddSprite( &fish1B );*/
 
 	// enable isr switchboard and VBlank interrupt
 	irq_init(NULL);
@@ -103,13 +121,13 @@ int main() {
 	// position the worm
 	worm.pos_x = 96;
 	worm.pos_y = 32;
-	spriteSetPosition( &worm );
+	spriteSetPosition( &worm );/*
 	fish1A.pos_x = 96;
 	fish1A.pos_y = 64;
 	spriteSetPosition( &fish1A );
 	fish1B.pos_x = 96+16;
 	fish1B.pos_y = 64;
-	spriteSetPosition( &fish1B );
+	spriteSetPosition( &fish1B );*/
 
 	u32 v = 0;
 	while(1) {
@@ -119,12 +137,12 @@ int main() {
 		REG_BG0VOFS= v++;
 
 		handleInput( &worm );
-
+/*
 		fish1A.pos_x -= 1;
 		spriteSetPosition( &fish1A );
 		fish1B.pos_x -= 1;
 		spriteSetPosition( &fish1B );
-
+*/
 		spritebufferUpload(3);
 
 	}

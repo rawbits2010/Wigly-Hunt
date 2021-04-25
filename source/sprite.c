@@ -2,24 +2,12 @@
 #include <string.h> // because of memcpy
 
 
-static u32 first_free_tile_idx = 0;	// this is actually a byte index
 static u32 first_free_palbank = 0;
 
 
-static u32 s_LoadTiles( const unsigned int *tiles, u32 tile_count, u32 tile_size ) {
+static u32 s_LoadPalette( const unsigned short *palette, u32 from_idx, u32 count ) {
 
-	u32 bytesize = tile_count*tile_size;
-	memcpy(&tile_mem[4][first_free_tile_idx], tiles, bytesize);
-
-	u32 temp_idx = first_free_tile_idx;
-	first_free_tile_idx += tile_count;
-
-	return temp_idx;
-}
-
-static u32 s_LoadPalette( const unsigned short *palette, u32 from, u32 len ) {
-
-	memcpy(&pal_obj_mem[first_free_palbank*16], &palette[from], len);
+	memcpy(&pal_obj_mem[first_free_palbank*16], &palette[from_idx*2], count*2);
 
 	u32 temp_idx = first_free_palbank;
 	first_free_palbank++;
@@ -38,19 +26,32 @@ static void s_SetObject( OBJ_ATTR *obj_attr, u32 tile_id, u32 pal_id ) {
 }
 
 
-inline void spriteLoadTiles( Sprite *obj ) {
-	obj->tilemem_start_idx = s_LoadTiles(obj->tiles, obj->frame_count * obj->tiles_per_frame, obj->tile_size);
-}
-
 inline void spriteLoadPalette( Sprite *obj ) {
 	// copying bytes but an entry is actually 2 bytes
-	obj->palmem_start_idx = s_LoadPalette(obj->palette, obj->palette_startidx*2, obj->palette_count*2);
+	obj->palmem_start_idx = s_LoadPalette(obj->palette, obj->palette_startidx, obj->palette_count);
 }
 
 inline void spriteSetPosition( Sprite *obj ) {
 	obj_set_pos(obj->obj_attr, obj->pos_x, obj->pos_y);
 }
 
-inline void spriteSetAnimationFrame( Sprite *obj ) {
-	s_SetObject(obj->obj_attr, obj->tilemem_start_idx + (obj->curr_frame * obj->tiles_per_frame), obj->palmem_start_idx);
+inline void spriteSetAnimationFrame( Sprite *obj, u32 anim_idx ) {
+	obj->curr_anim = anim_idx;
+	Animation *curr_anim = &obj->anims[obj->curr_anim];
+	animationReset(curr_anim);
+	s_SetObject(obj->obj_attr, curr_anim->tilemem_start_idx + (curr_anim->curr_frame_idx * curr_anim->tiles_per_frame), obj->palmem_start_idx);
+}
+
+inline void spriteAdvanceAnimation( Sprite *obj ) {
+	Animation *curr_anim = &obj->anims[obj->curr_anim];
+
+	if( animationAdvance( curr_anim ) ) {
+
+		// one-shot animation should change back to the default
+		if( !curr_anim->do_loop && curr_anim->done ) {
+			spriteSetAnimationFrame( obj, obj->default_anim );
+		} else {
+			s_SetObject(obj->obj_attr, curr_anim->tilemem_start_idx + (curr_anim->curr_frame_idx * curr_anim->tiles_per_frame), obj->palmem_start_idx);
+		}
+	}
 }

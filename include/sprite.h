@@ -9,23 +9,28 @@ typedef struct Sprite {
 
 	// animation
 	Animation *anims;
-	u32 curr_anim;
+	u32 default_anim;
+	u32 curr_anim; // handled internally
+
+	// all animation using the same sprite palette
+	const short unsigned int *palette;
+	u32 palette_startidx;
+	u32 palette_count;
+	u32 palmem_start_idx;	// ahndled internally
 
 	// points to a place in the buffer - filled by sprite_buffer
 	OBJ_ATTR *obj_attr;
 
 	// these are the options you are looking for
-	u32 curr_frame;	// current animation frame - zero based
 	u32 pos_x;		// storing x position on screen
 	u32 pos_y;		// storing y position on screen
 
 } Sprite;
 
-extern void spriteLoadTiles( Sprite *obj );
 extern void spriteLoadPalette( Sprite *obj );
 extern void spriteSetPosition( Sprite *obj );
-extern void spriteAddAnimation( Sprite *obj );
+extern void spriteSetAnimationFrame( Sprite *obj, u32 anim_idx );
 
-extern void spriteSetAnimationFrame( Sprite *obj );
+extern void spriteAdvanceAnimation( Sprite *obj );
 
 #endif // SPRITE_H

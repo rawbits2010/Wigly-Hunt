@@ -12,7 +12,7 @@ inline void spritebufferInit() {
 
 inline void spritebufferAddSprite( Sprite *obj ) {
 	obj->obj_attr = &obj_buffer[first_free_sprite_idx++];
-	spriteSetAnimationFrame(obj); // ugly but does just what we need
+	spriteSetAnimationFrame(obj, 0); // ugly but does just what we need
 }
 
 inline void spritebufferUpload( u32 len ) {
