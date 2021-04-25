@@ -31,8 +31,8 @@ typedef struct Animation {
 	u32 pong_dir;	// handled internally (+1 or -1) (2 bits)
 
 	// positioning this animation from the base anim
-	u32 h_offset;
-	
+	s32 h_offset;
+
 } Animation;
 
 extern void animationInit( Animation *obj, u32 speed, bool do_loop, bool do_pong );

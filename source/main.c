@@ -28,8 +28,14 @@ void handleInput( Sprite *obj ) {
 	obj->pos_x += force_x;
 	obj->pos_y += force_y;
 
+	if( key_hit(KEY_B) ) {
+		spriteSetAnimationFrame( obj, 1 );
+		spriteSetHFlipped( obj, false );
+	}
+
 	if( key_hit(KEY_A) ) {
 		spriteSetAnimationFrame( obj, 1 );
+		spriteSetHFlipped( obj, true );
 	}
 
 //	spriteSetAnimationFrame( obj );
@@ -48,6 +54,7 @@ int main() {
 	worm_wiggle.tile_size = 32;
 	worm_wiggle.tiles_per_frame = 4;
 	worm_wiggle.frame_count = 4;
+	worm_wiggle.h_offset = 0;
 	animationInit(&worm_wiggle, 15, true, false);
 
 	worm_anims[0] = worm_wiggle;
@@ -57,13 +64,14 @@ int main() {
 	worm_hit.tile_size = 32;
 	worm_hit.tiles_per_frame = 4;
 	worm_hit.frame_count = 4;
+	worm_hit.h_offset = -5;
 	animationInit(&worm_hit, 4, false, false);
 
 	worm_anims[1] = worm_hit;
 
 	Sprite worm;
 	worm.anims = &worm_anims[0];
-	worm.default_anim = 0;
+	worm.default_anim_idx = 0;
 	worm.palette = wormPal;
 	worm.palette_startidx = 0;
 	worm.palette_count = 16;	// use only the first 16 colors

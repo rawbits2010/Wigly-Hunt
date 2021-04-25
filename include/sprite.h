@@ -9,8 +9,8 @@ typedef struct Sprite {
 
 	// animation
 	Animation *anims;
-	u32 default_anim;
-	u32 curr_anim; // handled internally
+	u32 default_anim_idx;
+	u32 curr_anim_idx; // handled internally
 
 	// all animation using the same sprite palette
 	const short unsigned int *palette;
@@ -25,12 +25,16 @@ typedef struct Sprite {
 	u32 pos_x;		// storing x position on screen
 	u32 pos_y;		// storing y position on screen
 
+	bool h_mirror;
+
 } Sprite;
 
 extern void spriteLoadPalette( Sprite *obj );
-extern void spriteSetPosition( Sprite *obj );
-extern void spriteSetAnimationFrame( Sprite *obj, u32 anim_idx );
 
+extern void spriteSetPosition( Sprite *obj );
+extern void spriteSetHFlipped( Sprite *obj, bool state );
+
+extern void spriteSetAnimationFrame( Sprite *obj, u32 anim_idx );
 extern void spriteAdvanceAnimation( Sprite *obj );
 
 #endif // SPRITE_H
