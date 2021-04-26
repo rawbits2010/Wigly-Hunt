@@ -6,8 +6,9 @@
 
 #define SEAWEED_SPAWN_TIME_MAX 146	// in frames
 
-#define DEEPNESS_LEVEL_MAX 1000 // in frames
+#define DEEPNESS_LEVEL_MAX 1200 //7200 // in frames (60/sec)
 #define DEEPNESS_COLOR_CHANGE (DEEPNESS_LEVEL_MAX / 16)
+#define DEEPNESS_SCROLL_TIME (DEEPNESS_COLOR_CHANGE / 32) // should scroll out in 1 color change
 
 typedef struct LevelMap {
 
@@ -22,13 +23,23 @@ typedef struct LevelMap {
 
 	// background
 	u32 curr_deepness_level;	// how far we are down
+	u32 curr_deepness_section;	// 0 - top, 1 - deep, 3 - bottom
+
 	u32 bg_color_change_level;	// bg color changes when zero
+	u32 curr_bg_color_idx;		// going down in the palette
+
+	u32 bg_scroll_pos;
+	u32 bg_scroll_time;			// advance scroll when zero
 
 } LevelMap;
 
 
 extern void levelmapInit();
 extern void levelmapUpdate();
+
+// determine state
+extern u32 levelmapGetDeepnessLevel();		// this is the background level - there are 16 levels of deepness
+extern u32 levelmapGetDeepnessSection();	// the section as is
 
 
 

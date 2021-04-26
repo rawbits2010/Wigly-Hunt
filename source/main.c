@@ -1,5 +1,6 @@
 #include <tonc.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "double_sprite.h"
 #include "sprite.h"
@@ -14,8 +15,11 @@
 #include "fish_1_B.h"
 #include "fish_2_A.h"
 #include "fish_2_B.h"
+#include "fish_3_A.h"
+#include "fish_3_B.h"
 #include "platform.h"
 #include "bg.h"
+#include "bg_color.h"
 
 
 
@@ -77,9 +81,19 @@ void createSprite( Sprite *out, Animation *anim_arr, const unsigned short *pal )
 	out->palette_count = 16;	// use only the first 16 colors
 }
 
-
+bool canSpawn( ) {
+	bool spawn_chance = (rand() % 1000000) > 9888000; // give a chance to spawn
+	if( spawn_chance ) {
+		spawn_chance = (rand() % 6) > 4;	// reject it 3rd of the time
+	}
+	return spawn_chance;
+}
 
 int main() {
+
+	// we are officially random
+	// TODO: set the seed from frames passed until start when there will be a menu finally
+	srand((unsigned) 2142314123);
 
 	// init graphics mode
 	spritebufferInit();
@@ -176,14 +190,47 @@ int main() {
 	fish2.right = &fish2B;
 	doublespriteSetHidden( &fish2, true );
 
+	// fish3
+	Animation fish3A_anims[1];
+
+	Animation fish3A_swim; // 16x16@4
+	createAnimation( &fish3A_swim, fish_3_ATiles, 3, 0 );
+	animationInit(&fish3A_swim, 15, true, true);
+
+	fish3A_anims[0] = fish3A_swim;
+
+	Animation fish3B_anims[1];
+
+	Animation fish3B_swim; // 16x16@4
+	createAnimation( &fish3B_swim, fish_3_BTiles, 3, 0 );
+	animationInit(&fish3B_swim, 15, true, true);
+
+	fish3B_anims[0] = fish3B_swim;
+
+	Sprite fish3A;
+	createSprite( &fish3A, &fish3A_anims[0], fish_3_APal );
+	spriteLoadPalette( &fish3A );
+	spritebufferAddSprite( &fish3A );
+	
+	Sprite fish3B;
+	createSprite( &fish3B, &fish3B_anims[0], fish_3_BPal );
+	spriteLoadPalette( &fish3B );
+	spritebufferAddSprite( &fish3B );
+
+	DoubleSprite fish3;
+	fish3.left = &fish3A;
+	fish3.right = &fish3B;
+	doublespriteSetHidden( &fish3, true );
+
 	// create an enemy buffer
 	enemybufferInit();
 
-	// load level map tiles
+	// load level map tiles and background color
 	memcpy(&pal_bg_mem[16], platformPal, 16*2);
 	memcpy(&tile_mem[0][1], platformTiles, platformTilesLen);
 	memcpy(&pal_bg_mem[16*2], bgPal, 16*2);
 	memcpy(&tile_mem[0][10], bgTiles, bgTilesLen);
+	memcpy(&pal_bg_mem[16*3], bg_colorPal, 16*2);
 
 	// setup the background
 	levelmapInit();
@@ -202,8 +249,8 @@ int main() {
 
 	// try to spawn fish1 in
 	enemybufferSpawnEnemy(&fish1, 50, 1);
-	enemybufferSpawnEnemy(&fish1, 30, 1);
-	enemybufferSpawnEnemy(&fish2, 70, 1);
+	enemybufferSpawnEnemy(&fish2, 30, 1);
+	enemybufferSpawnEnemy(&fish3, 70, 1);
 
 	// position the worm and fish
 	worm.pos_x = 96;
@@ -220,11 +267,79 @@ int main() {
 		spriteAdvanceAnimation( &worm );
 		doublespriteAdvanceAnimation( &fish1 );
 		doublespriteAdvanceAnimation( &fish2 );
+		doublespriteAdvanceAnimation( &fish3 );
 
 		// update game state
 		enemybufferUpdateEnemies( &worm );
 		levelmapUpdate();
 
+
+		u32 deepness = levelmapGetDeepnessLevel();
+		u32 section = levelmapGetDeepnessSection();
+/*
+		// spawn only while descending
+		if( section == 1 ) {
+			switch( deepness ) {
+
+				case 0:
+				case 1:
+				case 2: {
+
+						if( canSpawn() ) {
+							enemybufferSpawnEnemy(&fish1, rand() % 240, 1);
+						}
+
+				} break;
+
+				case 3:
+				case 4: {
+
+						if( canSpawn()) {
+							enemybufferSpawnEnemy(&fish1, rand() % 240, 1);
+						}
+						if( canSpawn() ) {
+							enemybufferSpawnEnemy(&fish2, rand() % 240, 1);
+						}
+
+				} break;
+
+				case 5:
+				case 6:
+				case 7:
+				case 8: {
+
+						if( canSpawn() ) {
+							enemybufferSpawnEnemy(&fish2, rand() % 240, 1);
+						}
+
+				} break;
+
+				case 9:
+				case 10:
+				case 11: {
+
+						if( canSpawn() ) {
+							enemybufferSpawnEnemy(&fish2, rand() % 240, 1);
+						}
+						if( canSpawn() ) {
+							enemybufferSpawnEnemy(&fish3, rand() % 240, 1);
+						}
+
+				} break;
+
+				case 12:
+				case 13:
+				case 14:
+				case 15: {
+
+						if( canSpawn() ) {
+							enemybufferSpawnEnemy(&fish3, rand() % 240, 1);
+						}
+
+				} break;
+			}
+		}
+*/
 		// do that
 		handleInput( &worm );
 

@@ -46,18 +46,30 @@ static void s_AddOceanTop() {
 
 }
 
-static void s_RemoveOceanTop() {
-
-}
-
 static void s_AddOceanBottom() {
 
+	u32 pos = 20*32 + 4*32; // bottom of screen + top scrolling out
+
+	for(u32 i = 0; i < 32; i+=2 ) {
+		se_mem[30][pos + i] = (SE_PALBANK(2) | 18);
+		se_mem[30][pos + i+1] = (SE_PALBANK(2) | 19);
+		se_mem[30][pos + i+32] = (SE_PALBANK(2) | 20);
+		se_mem[30][pos + i+32+1] = (SE_PALBANK(2) | 21);
+	}
+
+	for(u32 i = 0; i < 32; i+=2 ) {
+		se_mem[30][pos + i+64] = (SE_PALBANK(2) | 22);
+		se_mem[30][pos + i+64+1] = (SE_PALBANK(2) | 23);
+		se_mem[30][pos + i+64 + 32] = (SE_PALBANK(2) | 24);
+		se_mem[30][pos + i+64 + 32 + 1] = (SE_PALBANK(2) | 25);
+	}
+
 }
 
-static void s_RemoveOceanBottom() {
 
+static void s_SetBGColorTo(u32 bg_pal_idx) {
+	pal_bg_mem[0] = pal_bg_mem[16*3 + bg_pal_idx];
 }
-
 
 inline void levelmapInit() {
 
@@ -71,19 +83,89 @@ inline void levelmapInit() {
 
 	// the actual background
 	levelmap.curr_deepness_level = DEEPNESS_LEVEL_MAX;
+
 	levelmap.bg_color_change_level = DEEPNESS_COLOR_CHANGE;
+	levelmap.curr_bg_color_idx = 15;
+	s_SetBGColorTo(levelmap.curr_bg_color_idx);
+
+	levelmap.bg_scroll_time = DEEPNESS_SCROLL_TIME;
+	levelmap.bg_scroll_pos = 0;
 
 	s_AddOceanTop();
+	s_AddOceanBottom();
 
 }
 
 inline void levelmapUpdate() {
 
+	//
 	// descending
-	levelmap.curr_deepness_level--;
-	levelmap.bg_color_change_level--;
-	//REG_BG0VOFS= levelmap.bg_scroll_pos--;
 
+	// determine deepness section
+	if( levelmap.curr_deepness_level >= (DEEPNESS_LEVEL_MAX - (DEEPNESS_SCROLL_TIME*32)) ) {
+		levelmap.curr_deepness_section = 0;	// top
+	} else if( levelmap.curr_deepness_level > DEEPNESS_SCROLL_TIME*32 )	{
+		levelmap.curr_deepness_section = 1;	// descending to the deep
+	} else if( levelmap.curr_deepness_level <= DEEPNESS_SCROLL_TIME*32 ) {
+		levelmap.curr_deepness_section = 2;	// bottom
+	}
+
+	switch( levelmap.curr_deepness_section ) {
+
+		// scrolling the top out
+		case 0: {
+
+			if( levelmap.bg_scroll_pos <= 32) {	// started descending
+
+				levelmap.bg_scroll_time--;
+				if(levelmap.bg_scroll_time <= 0 ) {
+					levelmap.bg_scroll_time = DEEPNESS_SCROLL_TIME;
+
+					REG_BG0VOFS = levelmap.bg_scroll_pos++;
+
+				}
+			}
+
+		} break;
+
+		// changing background color
+		case 1: {
+
+			levelmap.bg_color_change_level--;
+			if( levelmap.bg_color_change_level <= 0 ) {
+				levelmap.bg_color_change_level = DEEPNESS_COLOR_CHANGE;
+			
+				levelmap.curr_bg_color_idx--;
+				s_SetBGColorTo(levelmap.curr_bg_color_idx);
+
+			}
+
+		} break;
+
+		// scrolling the bottom in
+		case 2: {
+				
+			if( levelmap.bg_scroll_pos <= 64) {	// started descending
+
+				if(levelmap.bg_scroll_time-- <= 0 ) {
+					levelmap.bg_scroll_time = DEEPNESS_SCROLL_TIME;
+
+					REG_BG0VOFS = levelmap.bg_scroll_pos++;
+
+				}
+			}
+
+		} break;
+
+	}
+	
+	if( levelmap.curr_deepness_level >= 0 ) {
+		levelmap.curr_deepness_level--;
+	} else {
+		// stop descending
+	}
+
+	//
 	// apearing seaweed
 	if( levelmap.seaweed_time_left > 0 ) {
 
@@ -113,4 +195,12 @@ inline void levelmapUpdate() {
 
 	REG_BG1VOFS= levelmap.seaweed_scroll_pos++;
 
+}
+
+u32 levelmapGetDeepnessLevel() {
+	return 15 - levelmap.curr_bg_color_idx;
+}
+
+u32 levelmapGetDeepnessSection() {
+	return levelmap.curr_deepness_section;
 }
