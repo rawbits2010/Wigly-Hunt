@@ -7,7 +7,7 @@
 #include "bg_color.h"
 
 
-LevelMap levelmap;
+static LevelMap levelmap;
 
 
 // always add at the row just before the view area (pos_x: 0-32)

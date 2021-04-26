@@ -13,31 +13,31 @@
 static EnemyBuffer enemy_buff;
 
 // fish1
-Animation fish1A_swim; // 16x16@4
-Animation fish1A_anims[1];
-Sprite fish1A;
-Animation fish1B_swim; // 16x16@4
-Animation fish1B_anims[1];
-Sprite fish1B;
-DoubleSprite fish1;
+static Animation fish1A_swim; // 16x16@4
+static Animation fish1A_anims[1];
+static Sprite fish1A;
+static Animation fish1B_swim; // 16x16@4
+static Animation fish1B_anims[1];
+static Sprite fish1B;
+static DoubleSprite fish1;
 
 // fish2
-Animation fish2A_anims[1];
-Animation fish2A_swim; // 16x16@4
-Animation fish2B_anims[1];
-Animation fish2B_swim; // 16x16@4
-Sprite fish2A;
-Sprite fish2B;
-DoubleSprite fish2;
+static Animation fish2A_anims[1];
+static Animation fish2A_swim; // 16x16@4
+static Animation fish2B_anims[1];
+static Animation fish2B_swim; // 16x16@4
+static Sprite fish2A;
+static Sprite fish2B;
+static DoubleSprite fish2;
 
 // fish3
-Animation fish3A_anims[1];
-Animation fish3A_swim; // 16x16@4
-Animation fish3B_anims[1];
-Animation fish3B_swim; // 16x16@4
-Sprite fish3A;
-Sprite fish3B;
-DoubleSprite fish3;
+static Animation fish3A_anims[1];
+static Animation fish3A_swim; // 16x16@4
+static Animation fish3B_anims[1];
+static Animation fish3B_swim; // 16x16@4
+static Sprite fish3A;
+static Sprite fish3B;
+static DoubleSprite fish3;
 
 
 void enemybufferInit() {
