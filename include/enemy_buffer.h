@@ -45,4 +45,9 @@ extern bool enemybufferDoHitTest( Sprite *worm );
 // did we hit a fish - returns the kind of fish or 255 when no hit
 extern u32 enemybufferDoSlapTest( Sprite *worm );
 
+// mainly for the win condition
+extern u32 enemybufferGetFishCount();
+
+extern void enemybufferHideFish();
+
 #endif // ENEMY_BUFFER_H

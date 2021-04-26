@@ -6,7 +6,7 @@
 
 #define SEAWEED_SPAWN_TIME_MAX 146	// in frames
 
-#define DEEPNESS_LEVEL_MAX 1200 //7200 // in frames (60/sec)
+#define DEEPNESS_LEVEL_MAX 4900 // in frames (60/sec)
 #define DEEPNESS_COLOR_CHANGE (DEEPNESS_LEVEL_MAX / 16)
 #define DEEPNESS_SCROLL_TIME (DEEPNESS_COLOR_CHANGE / 32) // should scroll out in 1 color change
 

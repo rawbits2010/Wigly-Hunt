@@ -8,7 +8,7 @@
 
 
 static LevelMap levelmap;
-
+static u32 tiles_offset = 20*32;
 
 // always add at the row just before the view area (pos_x: 0-32)
 static void s_AddSeaweed( u32 pos_x ) {
@@ -16,10 +16,10 @@ static void s_AddSeaweed( u32 pos_x ) {
 	u32 scroll_pos = (levelmap.seaweed_scroll_pos/256)/8;
 	u32 base_pos = (32*2)*((15+scroll_pos)%15) + pos_x;
 
-	se_mem[31][base_pos] = (SE_PALBANK(1) | 1);
-	se_mem[31][base_pos+1] = (SE_PALBANK(1) | 2);
-	se_mem[31][base_pos + 32] = (SE_PALBANK(1) | 3);
-	se_mem[31][base_pos + 32 + 1] = (SE_PALBANK(1) | 4);
+	se_mem[31][base_pos] = (SE_PALBANK(1) | (tiles_offset+1));
+	se_mem[31][base_pos+1] = (SE_PALBANK(1) | (tiles_offset+2));
+	se_mem[31][base_pos + 32] = (SE_PALBANK(1) | (tiles_offset+3));
+	se_mem[31][base_pos + 32 + 1] = (SE_PALBANK(1) | (tiles_offset+4));
 
 	levelmap.seaweed_added_at = base_pos;
 }
@@ -28,27 +28,27 @@ static void s_RemoveSeaweed() {
 
 	u32 base_pos = levelmap.seaweed_added_at;
 
-	se_mem[31][base_pos] = 0;
-	se_mem[31][base_pos+1] = 0;
-	se_mem[31][base_pos + 32] = 0;
-	se_mem[31][base_pos + 32 + 1] = 0;
+	se_mem[31][base_pos] = tiles_offset;
+	se_mem[31][base_pos+1] = tiles_offset;
+	se_mem[31][base_pos + 32] = tiles_offset;
+	se_mem[31][base_pos + 32 + 1] = tiles_offset;
 
 }
 
 static void s_AddOceanTop() {
 
 	for(u32 i = 0; i < 32; i+=2 ) {
-		se_mem[30][i] = (SE_PALBANK(2) | 10);
-		se_mem[30][i+1] = (SE_PALBANK(2) | 11);
-		se_mem[30][i + 32] = (SE_PALBANK(2) | 12);
-		se_mem[30][i + 32 + 1] = (SE_PALBANK(2) | 13);
+		se_mem[30][i] = (SE_PALBANK(2) | (tiles_offset+10));
+		se_mem[30][i+1] = (SE_PALBANK(2) | (tiles_offset+11));
+		se_mem[30][i + 32] = (SE_PALBANK(2) | (tiles_offset+12));
+		se_mem[30][i + 32 + 1] = (SE_PALBANK(2) | (tiles_offset+13));
 	}
 
 	for(u32 i = 0; i < 32; i+=2 ) {
-		se_mem[30][i+64] = (SE_PALBANK(2) | 14);
-		se_mem[30][i+64+1] = (SE_PALBANK(2) | 15);
-		se_mem[30][i+64 + 32] = (SE_PALBANK(2) | 16);
-		se_mem[30][i+64 + 32 + 1] = (SE_PALBANK(2) | 17);
+		se_mem[30][i+64] = (SE_PALBANK(2) | (tiles_offset+14));
+		se_mem[30][i+64+1] = (SE_PALBANK(2) | (tiles_offset+15));
+		se_mem[30][i+64 + 32] = (SE_PALBANK(2) | (tiles_offset+16));
+		se_mem[30][i+64 + 32 + 1] = (SE_PALBANK(2) | (tiles_offset+17));
 	}
 
 }
@@ -58,17 +58,17 @@ static void s_AddOceanBottom() {
 	u32 pos = 20*32 + 4*32; // bottom of screen + top scrolling out
 
 	for(u32 i = 0; i < 32; i+=2 ) {
-		se_mem[30][pos + i] = (SE_PALBANK(2) | 18);
-		se_mem[30][pos + i+1] = (SE_PALBANK(2) | 19);
-		se_mem[30][pos + i+32] = (SE_PALBANK(2) | 20);
-		se_mem[30][pos + i+32+1] = (SE_PALBANK(2) | 21);
+		se_mem[30][pos + i] = (SE_PALBANK(2) | (tiles_offset+18));
+		se_mem[30][pos + i+1] = (SE_PALBANK(2) | (tiles_offset+19));
+		se_mem[30][pos + i+32] = (SE_PALBANK(2) | (tiles_offset+20));
+		se_mem[30][pos + i+32+1] = (SE_PALBANK(2) | (tiles_offset+21));
 	}
 
 	for(u32 i = 0; i < 32; i+=2 ) {
-		se_mem[30][pos + i+64] = (SE_PALBANK(2) | 22);
-		se_mem[30][pos + i+64+1] = (SE_PALBANK(2) | 23);
-		se_mem[30][pos + i+64 + 32] = (SE_PALBANK(2) | 24);
-		se_mem[30][pos + i+64 + 32 + 1] = (SE_PALBANK(2) | 25);
+		se_mem[30][pos + i+64] = (SE_PALBANK(2) | (tiles_offset+22));
+		se_mem[30][pos + i+64+1] = (SE_PALBANK(2) | (tiles_offset+23));
+		se_mem[30][pos + i+64 + 32] = (SE_PALBANK(2) | (tiles_offset+24));
+		se_mem[30][pos + i+64 + 32 + 1] = (SE_PALBANK(2) | (tiles_offset+25));
 	}
 
 }
@@ -82,15 +82,19 @@ inline void levelmapInit() {
 
 	// load level map tiles and background color
 	memcpy(&pal_bg_mem[16], platformPal, 16*2);
-	memcpy(&tile_mem[0][1], platformTiles, platformTilesLen);
+	memcpy(&tile_mem[0][tiles_offset+1], platformTiles, platformTilesLen);
 	memcpy(&pal_bg_mem[16*2], bgPal, 16*2);
-	memcpy(&tile_mem[0][10], bgTiles, bgTilesLen);
+	memcpy(&tile_mem[0][tiles_offset+10], bgTiles, bgTilesLen);
 	memcpy(&pal_bg_mem[16*3], bg_colorPal, 16*2);
 
-	levelmapReset();
-
 	s_AddOceanTop();
+
+	// clear ocean
+	memset(&se_mem[30][4*32], 0, 40*32);
+
 	s_AddOceanBottom();
+
+	//levelmapReset();
 
 }
 
@@ -126,8 +130,10 @@ inline void levelmapUpdate() {
 		levelmap.curr_deepness_section = 0;	// top
 	} else if( levelmap.curr_deepness_level > DEEPNESS_SCROLL_TIME*32 )	{
 		levelmap.curr_deepness_section = 1;	// descending to the deep
-	} else if( levelmap.curr_deepness_level <= DEEPNESS_SCROLL_TIME*32 ) {
+	} else if( levelmap.curr_deepness_level <= DEEPNESS_SCROLL_TIME*32 && levelmap.curr_deepness_level != 0 ) {
 		levelmap.curr_deepness_section = 2;	// bottom
+	} else {
+		levelmap.curr_deepness_section = 3;	// level end - TODO: boss fight
 	}
 
 	switch( levelmap.curr_deepness_section ) {
@@ -205,7 +211,7 @@ inline void levelmapUpdate() {
 			levelmap.curr_seaweed_spawn_time = 0;
 
 			// TODO: random here
-			s_AddSeaweed( 0 );
+			//s_AddSeaweed( 0 ); buggy as hell
 			levelmap.seaweed_time_left = 160+8; // scroll exactly one screen height
 
 			// TODO: random here

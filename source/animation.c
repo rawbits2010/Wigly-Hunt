@@ -3,7 +3,7 @@
 #include <tonc.h>
 #include <string.h>
 
-static u32 first_free_tile_idx = 0;
+static u32 first_free_tile_idx = 23;
 
 
 void createAnimation( Animation *out, const unsigned int *tiles, u32 frame_count, u32 h_offset ) {

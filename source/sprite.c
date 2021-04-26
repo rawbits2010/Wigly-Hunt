@@ -2,7 +2,7 @@
 #include <string.h> // because of memcpy
 
 
-static u32 first_free_palbank = 0;
+static u32 first_free_palbank = 1;
 
 
 void createSprite( Sprite *out, Animation *anim_arr, const unsigned short *pal ) {

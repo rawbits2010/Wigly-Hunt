@@ -6,6 +6,11 @@
 #include "double_sprite.h"
 
 
+// TODO: merge
+#include "letter.h"
+extern void spritebufferCreateLetter( Letter *obj, u32 tile_idx );
+
+
 // Note: these are hidden by default and needs to be filled from some other Sprite
 extern void spritebufferCreateEmpty( Sprite *obj );
 

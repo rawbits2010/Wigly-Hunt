@@ -6,6 +6,28 @@ static OBJ_AFFINE *obj_aff_buffer= (OBJ_AFFINE*)obj_buffer;
 static u32 first_free_sprite_idx = 0;
 
 
+
+// letter stuff
+// TODO: merge sprite and letter
+void spritebufferCreateLetter( Letter *obj, u32 tile_idx ) {
+
+	obj->tile_id = tile_idx;
+	
+	// TODO: duplicate code is bad!
+	obj->obj_attr = &obj_buffer[first_free_sprite_idx++];
+	
+	obj->obj_attr->attr0 = ATTR0_SQUARE;
+	obj->obj_attr->attr1 = ATTR1_SIZE_8;
+	obj->obj_attr->attr2 = ATTR2_PALBANK(0) | tile_idx;
+
+
+}
+
+
+
+//
+// sprite stuff
+
 inline void spritebufferCloneSprite( Sprite *src, Sprite *dst ) {
 	spritebufferAddSprite( dst );
 	spriteCopySprite( src, dst );

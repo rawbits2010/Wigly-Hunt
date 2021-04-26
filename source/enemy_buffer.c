@@ -328,7 +328,7 @@ void enemybufferUpdateEnemies( Sprite *worm ) {
 bool enemybufferDoHitTest( Sprite *worm ) {
 
 	// hit area is hardcoded here for now
-	u32 fish_hit_area = 4;
+	u32 fish_hit_area = 3;
 	u32 worm_hit_area = 4;
 
 	for(u32 i = 0; i < 5; i++ ) {
@@ -376,7 +376,7 @@ static inline u32 s_GetWormHitPosY( Sprite *worm ) {
 u32 enemybufferDoSlapTest( Sprite *worm ) {
 	
 	// hardcoded until objects happen
-	u32 worm_hit_area = 5;
+	u32 worm_hit_area = 6;
 	u32 fish_h_hit_area = 11;
 	u32 fish_x_hit_area = 5;
 			
@@ -413,4 +413,24 @@ u32 enemybufferDoSlapTest( Sprite *worm ) {
 	}
 
 	return 255;
+}
+
+
+u32 enemybufferGetFishCount() {
+	u32 live_fish = 0;
+	
+	for(u32 i = 0; i < 5; i++ ) {
+		if( !enemy_buff.enemies[i].hidden ) {
+			live_fish++;
+		}
+	}
+
+	return live_fish;
+}
+
+// hack
+void enemybufferHideFish() {
+		for(u32 i = 0; i < 5; i++ ) {
+			doublespriteSetHidden(&enemy_buff.enemies[i], true);
+		}
 }

@@ -7,6 +7,9 @@
 #include "enemy_buffer.h"
 #include "level_map.h"
 
+#include "title_screen.h"
+#include "end_screen.h"
+
 // gfx data
 #include "worm.h"
 #include "worm_hit.h"
@@ -15,6 +18,7 @@
 #define WORM_WIGGLE 0
 #define WORM_HIT 1
 
+#define DESCEND_SCORE 1
 #define FISH_1_SCORE 100
 #define FISH_2_SCORE 250
 #define FISH_3_SCORE 500
@@ -97,6 +101,7 @@ void resetRun( Sprite *worm, u32 frames, u32 *run_score ) {
 	// start above center
 	worm->pos_x = (240-16)/2;
 	worm->pos_y = ((160-16)/4);
+	spriteSetHidden(worm, false);
 
 	// eliminate enemies
 	enemybufferReset();
@@ -106,59 +111,87 @@ void resetRun( Sprite *worm, u32 frames, u32 *run_score ) {
 
 }
 
-int main() {
+u32 frame_count;
+u32 curr_screen;
+#define TITLE_SCREEN 0
+#define GAME_SCREEN 1
+#define DEATH_SCREEN 2
+#define END_SCREEN 3
 
-	// accumulate score in this
-	u32 run_score;
+void doTitleScreen( u32 last_run_score, u32 top_score ) {
 
-	// init graphics mode
-	spritebufferInit();
-	REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
-	REG_BG0CNT= BG_CBB(0) | BG_SBB(30) | BG_4BPP | BG_REG_32x32;
-	REG_BG1CNT= BG_CBB(0) | BG_SBB(31) | BG_4BPP | BG_REG_32x32;
+	REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
+	REG_BG0CNT= BG_CBB(0) | BG_SBB(29) | BG_4BPP | BG_REG_32x32;
 
-	// TODO: oh, maaan... just put these into their respective objects allready!
+	titlescreenReset( top_score, last_run_score );
+
+	do {
+
+		VBlankIntrWait();
+		frame_count++;
+		
+		// update stuff
+		titlescreenUpdate();
+
+		// finalize
+		spritebufferUpload(128);
+
+	// check for start / a
+	} while( !titlescreenHandleInput() );
+
+	curr_screen = GAME_SCREEN;
+}
+
 
 	//
 	// create the worm sprite with animations
-
+	// TODO: move into a worm object
 	Animation worm_wiggle; // 16x16@4
+	Animation worm_hit; // 16x16@4
+	Animation worm_anims[2];
+	Sprite worm;
+	void wormInit() {
+
 	createAnimation( &worm_wiggle, wormTiles, 4, 0 );
 	worm_wiggle.coll_x_offset = 5;
 	worm_wiggle.coll_y_offset = 6;
 	animationInit(&worm_wiggle, 15, true, false);
 
-	Animation worm_hit; // 16x16@4
 	createAnimation( &worm_hit, worm_hitTiles, 4, -5 );
 	worm_hit.coll_x_offset = 10;
 	worm_hit.coll_y_offset = 6;
 	animationInit(&worm_hit, 4, false, false);
 
-	Animation worm_anims[2];
 	worm_anims[WORM_WIGGLE] = worm_wiggle;
 	worm_anims[WORM_HIT] = worm_hit;
 
-	Sprite worm;
 	createSprite( &worm, &worm_anims[0], wormPal );
 	spriteLoadPalette( &worm );
 	spritebufferAddSprite( &worm );
 
-	// create an enemy buffer and load enemy sprites
-	enemybufferInit();
+	spriteSetHidden(&worm, true);
+	}
 
-	// load and setup the background
-	levelmapInit();
 
-	// enable isr switchboard and VBlank interrupt
-	irq_init(NULL);
-	irq_add(II_VBLANK, NULL);
+
+void doGameScreen( u32 *run_score ) {
+
+	// init graphics mode
+	REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
+	REG_BG0CNT= BG_CBB(0) | BG_SBB(30) | BG_4BPP | BG_REG_32x32;
+	REG_BG1CNT= BG_CBB(0) | BG_SBB(31) | BG_4BPP | BG_REG_32x32;
 
 	// reset all positions and stuff for a new game
-	resetRun( &worm, 2142314123, &run_score );
+	resetRun( &worm, frame_count, run_score );
 
+	bool win = false;
 	while(1) {
 
 		VBlankIntrWait();
+		frame_count++;
+
+		// give point for descending
+		*run_score += DESCEND_SCORE;
 
 		// do animation
 		spriteAdvanceAnimation( &worm );
@@ -253,15 +286,15 @@ int main() {
 				switch( kind ) {
 
 					case 1: {
-						run_score += FISH_1_SCORE;
+						*run_score += FISH_1_SCORE;
 					} break;
 
 					case 2: {
-						run_score += FISH_2_SCORE;
+						*run_score += FISH_2_SCORE;
 					} break;
 
 					case 3: {
-						run_score += FISH_3_SCORE;
+						*run_score += FISH_3_SCORE;
 					} break;
 
 				}
@@ -269,12 +302,24 @@ int main() {
 			} while( kind != 255 );
 		}
 
+		//
+		// end condition checks!!!
+
 		// hittest
 		if( enemybufferDoHitTest( &worm ) ) {
+			enemybufferHideFish();
+			spriteSetHidden(&worm, true);
+			spritebufferUpload(128);
+			break; // You are dead Jim!
+		}
 
-			// TODO: run ended
-			se_mem[31][20*32+(rand()%16)+8] = (SE_PALBANK(1) | 1);
-
+		// are you winning, son?
+		if( section == 3 && enemybufferGetFishCount() == 0 ) {
+			win = true;
+			enemybufferHideFish();
+			spriteSetHidden(&worm, true);
+			spritebufferUpload(128);
+			break;
 		}
 
 		// do that
@@ -284,6 +329,92 @@ int main() {
 		spritebufferUpload(128);
 
 	}
+
+	if( win ) {
+		curr_screen = END_SCREEN;
+	} else {
+		curr_screen = DEATH_SCREEN;
+	}
+	
+}
+
+void doEndScreen( bool win ) {
+
+	REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
+	REG_BG0CNT= BG_CBB(0) | BG_SBB(28) | BG_4BPP | BG_REG_32x32;
+
+	endscreenReset( win );
+
+	do {
+
+		VBlankIntrWait();
+		frame_count++;
+		
+		// update stuff
+		//endscreenUpdate();
+
+	// check for start / a
+	} while( !endscreenHandleInput() );
+
+	curr_screen = TITLE_SCREEN;
+}
+
+int main() {
+
+	// accumulate score in this
+	u32 run_score = 0;
+	u32 top_score = 0;
+
+	frame_count = 0;
+
+	spritebufferInit();
+
+	titlescreenInit();
+	endscreenInit();
+
+ 	wormInit();
+	
+	// create an enemy buffer and load enemy sprites
+	enemybufferInit();
+
+	// load and setup the background
+	levelmapInit();
+
+
+	// enable isr switchboard and VBlank interrupt
+	irq_init(NULL);
+	irq_add(II_VBLANK, NULL);
+
+	// dirty basic screen switcher
+	curr_screen = TITLE_SCREEN;
+	while(1) {
+
+		switch(curr_screen) {
+
+			case TITLE_SCREEN: {
+				doTitleScreen(run_score, top_score);
+			} break;
+
+			case GAME_SCREEN: {
+				doGameScreen( &run_score );
+				
+				// update score
+				if( run_score > top_score) {
+					top_score = run_score;
+				}
+			} break;
+
+			case DEATH_SCREEN: {
+				doEndScreen( false );
+			} break;
+
+			case END_SCREEN: {
+				doEndScreen( true );
+			} break;
+
+		}
+	}
+
 
 	return 0;
 }
