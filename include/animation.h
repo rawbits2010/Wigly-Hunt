@@ -39,6 +39,9 @@ typedef struct Animation {
 
 } Animation;
 
+
+extern void createAnimation( Animation *out, const unsigned int *tiles, u32 frame_count, u32 h_offset );
+
 extern void animationInit( Animation *obj, u32 speed, bool do_loop, bool do_pong );
 extern void animationLoadTiles( Animation *obj );
 extern bool animationAdvance( Animation *obj );

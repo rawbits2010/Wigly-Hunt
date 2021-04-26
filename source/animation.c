@@ -6,6 +6,13 @@
 static u32 first_free_tile_idx = 0;
 
 
+void createAnimation( Animation *out, const unsigned int *tiles, u32 frame_count, u32 h_offset ) {
+	out->tiles = tiles;
+	out->tile_size = 32;
+	out->tiles_per_frame = 4;
+	out->frame_count = frame_count;
+	out->h_offset = h_offset;
+}
 
 void animationInit( Animation *obj, u32 speed, bool do_loop, bool do_pong ) {
 

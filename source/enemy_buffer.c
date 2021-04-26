@@ -1,13 +1,127 @@
 #include "enemy_buffer.h"
 
-#include <stdlib.h>
+#include <stdlib.h>	// for rand()
+
+#include "fish_1_A.h"
+#include "fish_1_B.h"
+#include "fish_2_A.h"
+#include "fish_2_B.h"
+#include "fish_3_A.h"
+#include "fish_3_B.h"
 
 
 static EnemyBuffer enemy_buff;
 
+// fish1
+Animation fish1A_swim; // 16x16@4
+Animation fish1A_anims[1];
+Sprite fish1A;
+Animation fish1B_swim; // 16x16@4
+Animation fish1B_anims[1];
+Sprite fish1B;
+DoubleSprite fish1;
+
+// fish2
+Animation fish2A_anims[1];
+Animation fish2A_swim; // 16x16@4
+Animation fish2B_anims[1];
+Animation fish2B_swim; // 16x16@4
+Sprite fish2A;
+Sprite fish2B;
+DoubleSprite fish2;
+
+// fish3
+Animation fish3A_anims[1];
+Animation fish3A_swim; // 16x16@4
+Animation fish3B_anims[1];
+Animation fish3B_swim; // 16x16@4
+Sprite fish3A;
+Sprite fish3B;
+DoubleSprite fish3;
+
 
 void enemybufferInit() {
 
+	//
+	// fish1
+	createAnimation( &fish1A_swim, fish_1_ATiles, 3, 0 );
+	fish1A_swim.coll_x_offset = 7;
+	fish1A_swim.coll_y_offset = 10;
+	animationInit(&fish1A_swim, 15, true, true);
+
+	fish1A_anims[0] = fish1A_swim;
+
+	createAnimation( &fish1B_swim, fish_1_BTiles, 3, 0 );
+	// no collision
+	animationInit(&fish1B_swim, 15, true, true);
+
+	fish1B_anims[0] = fish1B_swim;
+
+	createSprite( &fish1A, &fish1A_anims[0], fish_1_APal );
+	spriteLoadPalette( &fish1A );
+	spritebufferAddSprite( &fish1A );
+	
+	createSprite( &fish1B, &fish1B_anims[0], fish_1_BPal );
+	spriteLoadPalette( &fish1B );
+	spritebufferAddSprite( &fish1B );
+
+	fish1.left = &fish1A;
+	fish1.right = &fish1B;
+	doublespriteSetHidden( &fish1, true );
+
+	//
+	// fish2
+	createAnimation( &fish2A_swim, fish_2_ATiles, 3, 0 );
+	fish2A_swim.coll_x_offset = 7;
+	fish2A_swim.coll_y_offset = 10;
+	animationInit(&fish2A_swim, 15, true, true);
+
+	fish2A_anims[0] = fish2A_swim;
+
+	createAnimation( &fish2B_swim, fish_2_BTiles, 3, 0 );
+	animationInit(&fish2B_swim, 15, true, true);
+
+	fish2B_anims[0] = fish2B_swim;
+
+	createSprite( &fish2A, &fish2A_anims[0], fish_2_APal );
+	spriteLoadPalette( &fish2A );
+	spritebufferAddSprite( &fish2A );
+	
+	createSprite( &fish2B, &fish2B_anims[0], fish_2_BPal );
+	spriteLoadPalette( &fish2B );
+	spritebufferAddSprite( &fish2B );
+
+	fish2.left = &fish2A;
+	fish2.right = &fish2B;
+	doublespriteSetHidden( &fish2, true );
+
+	//
+	// fish3
+	createAnimation( &fish3A_swim, fish_3_ATiles, 3, 0 );
+	fish3A_swim.coll_x_offset = 7;
+	fish3A_swim.coll_y_offset = 10;
+	animationInit(&fish3A_swim, 15, true, true);
+
+	fish3A_anims[0] = fish3A_swim;
+
+	createAnimation( &fish3B_swim, fish_3_BTiles, 3, 0 );
+	animationInit(&fish3B_swim, 15, true, true);
+
+	fish3B_anims[0] = fish3B_swim;
+
+	createSprite( &fish3A, &fish3A_anims[0], fish_3_APal );
+	spriteLoadPalette( &fish3A );
+	spritebufferAddSprite( &fish3A );
+	
+	createSprite( &fish3B, &fish3B_anims[0], fish_3_BPal );
+	spriteLoadPalette( &fish3B );
+	spritebufferAddSprite( &fish3B );
+
+	fish3.left = &fish3A;
+	fish3.right = &fish3B;
+	doublespriteSetHidden( &fish3, true );
+
+	//
 	// create empty, hidden sprites
 	for(u32 i = 0; i < 5; i++ ) {
 
@@ -25,14 +139,35 @@ void enemybufferInit() {
 
 }
 
+void enemybufferReset() {
+
+	// only need to hide enemies as everything else will be overwritten on spawn
+	for(u32 i = 0; i < 5; i++ ) {
+		doublespriteSetHidden( &(enemy_buff.enemies[i]), true );
+	}
+
+}
+
 // screen 240x160
-void enemybufferSpawnEnemy(DoubleSprite *enemy, u32 kind, u32 pos_x, u32 movement ) {
+void enemybufferSpawnEnemy( u32 kind, u32 pos_x, u32 movement ) {
 	for(u32 i = 0; i < 5; i++ ) {
 
 		// is slot free -> spawn
 		if( enemy_buff.enemies[i].hidden ) {
 	
 			DoubleSprite *curr_enemy = &(enemy_buff.enemies[i]);
+
+			// hardcoded for now
+			DoubleSprite *enemy;
+			if( kind == 1 ) {
+				enemy = &fish1;
+			} else if( kind == 2 ) {
+				enemy = &fish2;
+			} else if( kind == 3 ) {
+				enemy = &fish3;
+			} else {
+				enemy = NULL;	// how to assert here?
+			}
 
 			doublespriteCopy( enemy, curr_enemy );
 			curr_enemy->pos_x = pos_x;
@@ -56,6 +191,11 @@ void enemybufferSpawnEnemy(DoubleSprite *enemy, u32 kind, u32 pos_x, u32 movemen
 }
 
 void enemybufferUpdateEnemies( Sprite *worm ) {
+
+	// do animation
+	doublespriteAdvanceAnimation( &fish1 );
+	doublespriteAdvanceAnimation( &fish2 );
+	doublespriteAdvanceAnimation( &fish3 );
 
 	for(u32 i = 0; i < 5; i++ ) {
 		if( !enemy_buff.enemies[i].hidden ) {

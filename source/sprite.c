@@ -5,6 +5,14 @@
 static u32 first_free_palbank = 0;
 
 
+void createSprite( Sprite *out, Animation *anim_arr, const unsigned short *pal ) {
+	out->anims = &anim_arr[0];
+	out->default_anim_idx = 0;
+	out->palette = pal;
+	out->palette_startidx = 0;
+	out->palette_count = 16;	// use only the first 16 colors
+}
+
 static u32 s_LoadPalette( const unsigned short *palette, u32 from_idx, u32 count ) {
 
 	memcpy(&pal_obj_mem[first_free_palbank*16], &palette[from_idx*2], count*2);

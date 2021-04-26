@@ -1,5 +1,12 @@
 #include "level_map.h"
 
+#include <string.h>
+
+#include "platform.h"
+#include "bg.h"
+#include "bg_color.h"
+
+
 LevelMap levelmap;
 
 
@@ -73,6 +80,22 @@ static void s_SetBGColorTo(u32 bg_pal_idx) {
 
 inline void levelmapInit() {
 
+	// load level map tiles and background color
+	memcpy(&pal_bg_mem[16], platformPal, 16*2);
+	memcpy(&tile_mem[0][1], platformTiles, platformTilesLen);
+	memcpy(&pal_bg_mem[16*2], bgPal, 16*2);
+	memcpy(&tile_mem[0][10], bgTiles, bgTilesLen);
+	memcpy(&pal_bg_mem[16*3], bg_colorPal, 16*2);
+
+	levelmapReset();
+
+	s_AddOceanTop();
+	s_AddOceanBottom();
+
+}
+
+void levelmapReset() {
+
 	// the seaweed layer
 	levelmap.curr_seaweed_spawn_time = 0;
 	levelmap.seaweed_spawn_cooldown = SEAWEED_SPAWN_TIME_MAX;
@@ -90,9 +113,6 @@ inline void levelmapInit() {
 
 	levelmap.bg_scroll_time = DEEPNESS_SCROLL_TIME;
 	levelmap.bg_scroll_pos = 0;
-
-	s_AddOceanTop();
-	s_AddOceanBottom();
 
 }
 

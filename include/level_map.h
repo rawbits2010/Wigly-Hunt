@@ -34,7 +34,11 @@ typedef struct LevelMap {
 } LevelMap;
 
 
+// call this only once!
 extern void levelmapInit();
+// call this before a new run
+extern void levelmapReset();
+// call this every frame
 extern void levelmapUpdate();
 
 // determine state

@@ -30,7 +30,7 @@ typedef struct Sprite {
 
 } Sprite;
 
-
+extern void createSprite( Sprite *out, Animation *anim_arr, const unsigned short *pal );
 extern void spriteCopySprite( Sprite *src, Sprite *dst );
 
 // like having cloned sprites with exactly the same animation

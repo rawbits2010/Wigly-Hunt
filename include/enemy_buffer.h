@@ -27,13 +27,17 @@ typedef struct EnemyBuffer {
 } EnemyBuffer;
 
 
+// do this only once! - creates objects
 extern void enemybufferInit();
+
+// use this before new run
+extern void enemybufferReset();
 
 // add enemy to the buffer if there is an empty slot
 // TODO: should only use kind, but no time to have correct objs
-extern void enemybufferSpawnEnemy(DoubleSprite *enemy, u32 kind, u32 pos_x, u32 movement );
+extern void enemybufferSpawnEnemy(u32 kind, u32 pos_x, u32 movement );
 
-// move them, remove them, do all that can be done
+// animate them, move them, remove them, do all that can be done - call every frame!
 extern void enemybufferUpdateEnemies( Sprite *worm );
 
 // did a fish got us?
