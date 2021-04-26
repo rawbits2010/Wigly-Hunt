@@ -35,5 +35,8 @@ extern void doublespriteSetPosition( DoubleSprite *obj );
 extern void doublespriteSetAnimationFrame( DoubleSprite *obj, u32 anim_idx );
 extern void doublespriteAdvanceAnimation( DoubleSprite *obj );
 
+extern u32 doublespriteGetCollisionPosX( DoubleSprite *obj );
+extern u32 doublespriteGetCollisionPosY( DoubleSprite *obj );
+
 
 #endif // DOUBLE_SPRITE_H

@@ -45,4 +45,7 @@ extern void spriteSetHidden( Sprite *obj, bool hide );
 extern void spriteSetAnimationFrame( Sprite *obj, u32 anim_idx );
 extern void spriteAdvanceAnimation( Sprite *obj );
 
+extern u32 spriteGetCollisionPosX( Sprite *obj );
+extern u32 spriteGetCollisionPosY( Sprite *obj );
+
 #endif // SPRITE_H

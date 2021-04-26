@@ -36,6 +36,20 @@ void handleInput( Sprite *obj ) {
 	obj->pos_x += force_x;
 	obj->pos_y += force_y;
 
+	// clamp worm into view
+	if( obj->pos_x > 245 ) { // u32
+		obj->pos_x = 0;
+	}
+	if( obj->pos_x > 224 ) { // 240-16
+		obj->pos_x = 224;
+	}
+	if( obj->pos_y > 245 ) { // u32
+		obj->pos_y = 0;
+	}
+	if( obj->pos_y > 144 ) { // 160-16
+		obj->pos_y = 144;
+	}
+
 	if(force_x != 0) {
 		if(force_x > 0) {
 			spriteSetHFlipped( obj, true );
@@ -81,10 +95,10 @@ void createSprite( Sprite *out, Animation *anim_arr, const unsigned short *pal )
 	out->palette_count = 16;	// use only the first 16 colors
 }
 
-bool canSpawn( ) {
-	bool spawn_chance = (rand() % 1000000) > 9888000; // give a chance to spawn
+bool canSpawn( u32 drop_recent ) {
+	bool spawn_chance = (rand() % 10000) > 9700; // give a chance to spawn
 	if( spawn_chance ) {
-		spawn_chance = (rand() % 6) > 4;	// reject it 3rd of the time
+		spawn_chance = (rand() % 100) > drop_recent;	// reject it 3rd of the time
 	}
 	return spawn_chance;
 }
@@ -101,18 +115,24 @@ int main() {
 	REG_BG0CNT= BG_CBB(0) | BG_SBB(30) | BG_4BPP | BG_REG_32x32;
 	REG_BG1CNT= BG_CBB(0) | BG_SBB(31) | BG_4BPP | BG_REG_32x32;
 
+	// TODO: oh, maaan... just put these into their respective objects allready!
+
 	//
 	// create the worm sprite with animations
 	Animation worm_anims[2];
 
 	Animation worm_wiggle; // 16x16@4
 	createAnimation( &worm_wiggle, wormTiles, 4, 0 );
+	worm_wiggle.coll_x_offset = 5;
+	worm_wiggle.coll_y_offset = 6;
 	animationInit(&worm_wiggle, 15, true, false);
 
 	worm_anims[0] = worm_wiggle;
 
 	Animation worm_hit; // 16x16@4
 	createAnimation( &worm_hit, worm_hitTiles, 4, -5 );
+	worm_hit.coll_x_offset = 10;
+	worm_hit.coll_y_offset = 6;
 	animationInit(&worm_hit, 4, false, false);
 
 	worm_anims[1] = worm_hit;
@@ -131,6 +151,8 @@ int main() {
 
 	Animation fish1A_swim; // 16x16@4
 	createAnimation( &fish1A_swim, fish_1_ATiles, 3, 0 );
+	fish1A_swim.coll_x_offset = 7;
+	fish1A_swim.coll_y_offset = 10;
 	animationInit(&fish1A_swim, 15, true, true);
 
 	fish1A_anims[0] = fish1A_swim;
@@ -139,6 +161,7 @@ int main() {
 
 	Animation fish1B_swim; // 16x16@4
 	createAnimation( &fish1B_swim, fish_1_BTiles, 3, 0 );
+	// no collision
 	animationInit(&fish1B_swim, 15, true, true);
 
 	fish1B_anims[0] = fish1B_swim;
@@ -163,6 +186,8 @@ int main() {
 
 	Animation fish2A_swim; // 16x16@4
 	createAnimation( &fish2A_swim, fish_2_ATiles, 3, 0 );
+	fish2A_swim.coll_x_offset = 7;
+	fish2A_swim.coll_y_offset = 10;
 	animationInit(&fish2A_swim, 15, true, true);
 
 	fish2A_anims[0] = fish2A_swim;
@@ -195,6 +220,8 @@ int main() {
 
 	Animation fish3A_swim; // 16x16@4
 	createAnimation( &fish3A_swim, fish_3_ATiles, 3, 0 );
+	fish3A_swim.coll_x_offset = 7;
+	fish3A_swim.coll_y_offset = 10;
 	animationInit(&fish3A_swim, 15, true, true);
 
 	fish3A_anims[0] = fish3A_swim;
@@ -240,17 +267,8 @@ int main() {
 	irq_add(II_VBLANK, NULL);
 
 
-	// game logic
-	// TODO: not here
-
-
 	//
 	// TEMP
-
-	// try to spawn fish1 in
-	enemybufferSpawnEnemy(&fish1, 50, 1);
-	enemybufferSpawnEnemy(&fish2, 30, 1);
-	enemybufferSpawnEnemy(&fish3, 70, 1);
 
 	// position the worm and fish
 	worm.pos_x = 96;
@@ -276,29 +294,39 @@ int main() {
 
 		u32 deepness = levelmapGetDeepnessLevel();
 		u32 section = levelmapGetDeepnessSection();
-/*
+
 		// spawn only while descending
 		if( section == 1 ) {
 			switch( deepness ) {
 
-				case 0:
-				case 1:
-				case 2: {
+				// want to see enemies for the start
+				case 0: {
 
-						if( canSpawn() ) {
-							enemybufferSpawnEnemy(&fish1, rand() % 240, 1);
+						if( canSpawn( 60 ) ) {
+							enemybufferSpawnEnemy(&fish1, rand() % 240, 0);
 						}
 
 				} break;
 
+				// steady spawn but let the get his power up
+				case 1:
+				case 2: {
+
+						if( canSpawn( 30 ) ) {
+							enemybufferSpawnEnemy(&fish1, rand() % 240, 0);
+						}
+
+				} break;
+
+				// just introducing the harder fish
 				case 3:
 				case 4: {
 
-						if( canSpawn()) {
-							enemybufferSpawnEnemy(&fish1, rand() % 240, 1);
+						if( canSpawn( 50 )) {
+							enemybufferSpawnEnemy(&fish1, rand() % 240, 0);
 						}
-						if( canSpawn() ) {
-							enemybufferSpawnEnemy(&fish2, rand() % 240, 1);
+						if( canSpawn( 30 ) ) {
+							enemybufferSpawnEnemy(&fish2, rand() % 240, 0);
 						}
 
 				} break;
@@ -308,8 +336,8 @@ int main() {
 				case 7:
 				case 8: {
 
-						if( canSpawn() ) {
-							enemybufferSpawnEnemy(&fish2, rand() % 240, 1);
+						if( canSpawn( 50 ) ) {
+							enemybufferSpawnEnemy(&fish2, rand() % 240, 0);
 						}
 
 				} break;
@@ -318,11 +346,11 @@ int main() {
 				case 10:
 				case 11: {
 
-						if( canSpawn() ) {
-							enemybufferSpawnEnemy(&fish2, rand() % 240, 1);
+						if( canSpawn( 50 ) ) {
+							enemybufferSpawnEnemy(&fish2, rand() % 240, 0);
 						}
-						if( canSpawn() ) {
-							enemybufferSpawnEnemy(&fish3, rand() % 240, 1);
+						if( canSpawn( 30 ) ) {
+							enemybufferSpawnEnemy(&fish3, rand() % 240, 0);
 						}
 
 				} break;
@@ -332,14 +360,22 @@ int main() {
 				case 14:
 				case 15: {
 
-						if( canSpawn() ) {
-							enemybufferSpawnEnemy(&fish3, rand() % 240, 1);
+						if( canSpawn( 60 ) ) {
+							enemybufferSpawnEnemy(&fish3, rand() % 240, 0);
 						}
 
 				} break;
 			}
 		}
-*/
+
+		// hittest
+		if( enemybufferDoHitTest( &worm ) ) {
+
+			// TODO: run ended
+			se_mem[31][20*32+16] = 0;
+
+		}
+
 		// do that
 		handleInput( &worm );
 

@@ -33,6 +33,10 @@ typedef struct Animation {
 	// positioning this animation from the base anim
 	s32 h_offset;
 
+	// the point in the sprite where is the center for collision
+	u32 coll_x_offset;
+	u32 coll_y_offset;
+
 } Animation;
 
 extern void animationInit( Animation *obj, u32 speed, bool do_loop, bool do_pong );

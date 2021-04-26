@@ -104,3 +104,18 @@ inline void spriteAdvanceAnimation( Sprite *obj ) {
 		}
 	}
 }
+
+
+inline u32 spriteGetCollisionPosX( Sprite *obj ) {
+	Animation *curr_anim = &obj->anims[obj->curr_anim_idx];
+	if( obj->h_mirror ) {	// can only be mirrorred horizontally
+		return obj->pos_x + 16 - curr_anim->coll_x_offset;
+	} else {
+		return obj->pos_x + curr_anim->coll_x_offset;
+	}
+}
+
+inline u32 spriteGetCollisionPosY( Sprite *obj ) {
+	Animation *curr_anim = &obj->anims[obj->curr_anim_idx];
+	return obj->pos_y + curr_anim->coll_y_offset;
+}

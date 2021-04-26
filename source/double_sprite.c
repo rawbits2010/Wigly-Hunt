@@ -2,8 +2,10 @@
 
 
 inline void doublespriteCopy( DoubleSprite *src, DoubleSprite *dst ) {
+	doublespriteSetHFlipped( dst, false );
 	spriteCopySprite(src->left, dst->left);
 	spriteCopySprite(src->right, dst->right);
+
 }
 
 inline void doublespriteUpdateGfx( DoubleSprite *obj ) {
@@ -60,4 +62,21 @@ inline void doublespriteAdvanceAnimation( DoubleSprite *obj ) {
 inline void doublespriteSetAnimationFrame( DoubleSprite *obj, u32 anim_idx ) {
 	spriteSetAnimationFrame( obj->left, anim_idx );
 	spriteSetAnimationFrame( obj->right, anim_idx );
+}
+
+
+u32 doublespriteGetCollisionPosX( DoubleSprite *obj ) {
+	if( obj->h_mirror ) {
+		return spriteGetCollisionPosX( obj->right );
+	} else {
+		return spriteGetCollisionPosX( obj->left );
+	}
+}
+
+u32 doublespriteGetCollisionPosY( DoubleSprite *obj ) {
+	if( obj->h_mirror ) {
+		return spriteGetCollisionPosY( obj->right );
+	} else {
+		return spriteGetCollisionPosY( obj->left );
+	}
 }

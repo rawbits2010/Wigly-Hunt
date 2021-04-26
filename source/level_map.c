@@ -147,7 +147,8 @@ inline void levelmapUpdate() {
 				
 			if( levelmap.bg_scroll_pos <= 64) {	// started descending
 
-				if(levelmap.bg_scroll_time-- <= 0 ) {
+				levelmap.bg_scroll_time--;
+				if(levelmap.bg_scroll_time <= 0 ) {
 					levelmap.bg_scroll_time = DEEPNESS_SCROLL_TIME;
 
 					REG_BG0VOFS = levelmap.bg_scroll_pos++;
