@@ -7,6 +7,7 @@ typedef struct EnemyBuffer {
 
 	// max 5 enemies on screen at the same time
 	DoubleSprite enemies[5];	// sprite to use
+	u32 enemy_kind[5];
 
 	bool movement_attracted[5];			// overrides the mode in the player get close and gets attracted
 
@@ -29,12 +30,15 @@ typedef struct EnemyBuffer {
 extern void enemybufferInit();
 
 // add enemy to the buffer if there is an empty slot
-extern void enemybufferSpawnEnemy(DoubleSprite *enemy, u32 pos_x, u32 movement );
+// TODO: should only use kind, but no time to have correct objs
+extern void enemybufferSpawnEnemy(DoubleSprite *enemy, u32 kind, u32 pos_x, u32 movement );
 
 // move them, remove them, do all that can be done
 extern void enemybufferUpdateEnemies( Sprite *worm );
 
 // did a fish got us?
 extern bool enemybufferDoHitTest( Sprite *worm );
+// did we hit a fish - returns the kind of fish or 255 when no hit
+extern u32 enemybufferDoSlapTest( Sprite *worm );
 
 #endif // ENEMY_BUFFER_H

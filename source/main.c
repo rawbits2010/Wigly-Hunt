@@ -22,6 +22,12 @@
 #include "bg_color.h"
 
 
+#define WORM_WIGGLE 0
+#define WORM_HIT 1
+
+#define FISH_1_SCORE 100
+#define FISH_2_SCORE 250
+#define FISH_3_SCORE 500
 
 void handleInput( Sprite *obj ) {
 
@@ -58,15 +64,15 @@ void handleInput( Sprite *obj ) {
 		}
 	}
 
-	if( key_hit(KEY_B) || key_hit(KEY_A) ) {
+	if( obj->curr_anim_idx != WORM_HIT ) {
 
 		if( key_hit(KEY_B) ) {
-			spriteSetAnimationFrame( obj, 1 );
+			spriteSetAnimationFrame( obj, WORM_HIT );
 			spriteSetHFlipped( obj, false );
 		}
 
 		if( key_hit(KEY_A) ) {
-			spriteSetAnimationFrame( obj, 1 );
+			spriteSetAnimationFrame( obj, WORM_HIT );
 			spriteSetHFlipped( obj, true );
 		}
 
@@ -75,6 +81,7 @@ void handleInput( Sprite *obj ) {
 	spriteSetPosition( obj );
 
 }
+
 
 //
 // helpers
@@ -109,6 +116,9 @@ int main() {
 	// TODO: set the seed from frames passed until start when there will be a menu finally
 	srand((unsigned) 2142314123);
 
+	// accumulate score in this
+	u32 run_score = 0;
+
 	// init graphics mode
 	spritebufferInit();
 	REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ | DCNT_OBJ_1D;
@@ -119,7 +129,6 @@ int main() {
 
 	//
 	// create the worm sprite with animations
-	Animation worm_anims[2];
 
 	Animation worm_wiggle; // 16x16@4
 	createAnimation( &worm_wiggle, wormTiles, 4, 0 );
@@ -127,15 +136,15 @@ int main() {
 	worm_wiggle.coll_y_offset = 6;
 	animationInit(&worm_wiggle, 15, true, false);
 
-	worm_anims[0] = worm_wiggle;
-
 	Animation worm_hit; // 16x16@4
 	createAnimation( &worm_hit, worm_hitTiles, 4, -5 );
 	worm_hit.coll_x_offset = 10;
 	worm_hit.coll_y_offset = 6;
 	animationInit(&worm_hit, 4, false, false);
 
-	worm_anims[1] = worm_hit;
+	Animation worm_anims[2];
+	worm_anims[WORM_WIGGLE] = worm_wiggle;
+	worm_anims[WORM_HIT] = worm_hit;
 
 	Sprite worm;
 	createSprite( &worm, &worm_anims[0], wormPal );
@@ -276,7 +285,6 @@ int main() {
 	spriteSetPosition( &worm );
 
 
-
 	while(1) {
 
 		VBlankIntrWait();
@@ -303,7 +311,7 @@ int main() {
 				case 0: {
 
 						if( canSpawn( 60 ) ) {
-							enemybufferSpawnEnemy(&fish1, rand() % 240, 0);
+							enemybufferSpawnEnemy(&fish1, 1, rand() % 240, 0);
 						}
 
 				} break;
@@ -313,7 +321,7 @@ int main() {
 				case 2: {
 
 						if( canSpawn( 30 ) ) {
-							enemybufferSpawnEnemy(&fish1, rand() % 240, 0);
+							enemybufferSpawnEnemy(&fish1, 1, rand() % 240, 0);
 						}
 
 				} break;
@@ -323,10 +331,10 @@ int main() {
 				case 4: {
 
 						if( canSpawn( 50 )) {
-							enemybufferSpawnEnemy(&fish1, rand() % 240, 0);
+							enemybufferSpawnEnemy(&fish1, 1, rand() % 240, 0);
 						}
 						if( canSpawn( 30 ) ) {
-							enemybufferSpawnEnemy(&fish2, rand() % 240, 0);
+							enemybufferSpawnEnemy(&fish2, 2, rand() % 240, 0);
 						}
 
 				} break;
@@ -337,7 +345,7 @@ int main() {
 				case 8: {
 
 						if( canSpawn( 50 ) ) {
-							enemybufferSpawnEnemy(&fish2, rand() % 240, 0);
+							enemybufferSpawnEnemy(&fish2, 2, rand() % 240, 0);
 						}
 
 				} break;
@@ -347,10 +355,10 @@ int main() {
 				case 11: {
 
 						if( canSpawn( 50 ) ) {
-							enemybufferSpawnEnemy(&fish2, rand() % 240, 0);
+							enemybufferSpawnEnemy(&fish2, 2, rand() % 240, 0);
 						}
 						if( canSpawn( 30 ) ) {
-							enemybufferSpawnEnemy(&fish3, rand() % 240, 0);
+							enemybufferSpawnEnemy(&fish3, 3, rand() % 240, 0);
 						}
 
 				} break;
@@ -361,18 +369,43 @@ int main() {
 				case 15: {
 
 						if( canSpawn( 60 ) ) {
-							enemybufferSpawnEnemy(&fish3, rand() % 240, 0);
+							enemybufferSpawnEnemy(&fish3, 3, rand() % 240, 0);
 						}
 
 				} break;
 			}
 		}
 
+		// check hitting to have a chance to survive
+		if( worm.curr_anim_idx == WORM_HIT ) {
+			u32 kind;
+			do {
+				kind = enemybufferDoSlapTest( &worm );
+
+				switch( kind ) {
+
+					case 1: {
+						run_score += FISH_1_SCORE;
+					} break;
+
+					case 2: {
+						run_score += FISH_2_SCORE;
+					} break;
+
+					case 3: {
+						run_score += FISH_3_SCORE;
+					} break;
+
+				}
+
+			} while( kind != 255 );
+		}
+
 		// hittest
 		if( enemybufferDoHitTest( &worm ) ) {
 
 			// TODO: run ended
-			se_mem[31][20*32+16] = 0;
+			se_mem[31][20*32+(rand()%16)+8] = (SE_PALBANK(1) | 1);
 
 		}
 

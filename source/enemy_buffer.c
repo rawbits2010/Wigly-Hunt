@@ -19,14 +19,14 @@ void enemybufferInit() {
 		DoubleSprite *Temp = &(enemy_buff.enemies[i]);
 		Temp->left = TempA;
 		Temp->right = TempB;
-		Temp->hidden = true;
+		doublespriteSetHidden( Temp, true );
 
 	}
 
 }
 
 // screen 240x160
-void enemybufferSpawnEnemy(DoubleSprite *enemy, u32 pos_x, u32 movement ) {
+void enemybufferSpawnEnemy(DoubleSprite *enemy, u32 kind, u32 pos_x, u32 movement ) {
 	for(u32 i = 0; i < 5; i++ ) {
 
 		// is slot free -> spawn
@@ -34,10 +34,13 @@ void enemybufferSpawnEnemy(DoubleSprite *enemy, u32 pos_x, u32 movement ) {
 	
 			DoubleSprite *curr_enemy = &(enemy_buff.enemies[i]);
 
+			doublespriteCopy( enemy, curr_enemy );
 			curr_enemy->pos_x = pos_x;
 			curr_enemy->pos_y = 160 + (rand() % 32);
-			doublespriteCopy( enemy, curr_enemy );
 			doublespriteSetHidden( curr_enemy, false );
+			doublespriteSetPosition( curr_enemy );	// so it's in the obj_buffer
+
+			enemy_buff.enemy_kind[i] = kind;
 
 			enemy_buff.movement_kind[i] = movement;
 			enemy_buff.movement_change_cooldown[i] = 30; // get half a sec benefit
@@ -184,15 +187,16 @@ void enemybufferUpdateEnemies( Sprite *worm ) {
 
 bool enemybufferDoHitTest( Sprite *worm ) {
 
+	// hit area is hardcoded here for now
+	u32 fish_hit_area = 4;
+	u32 worm_hit_area = 4;
+
 	for(u32 i = 0; i < 5; i++ ) {
 		if( !enemy_buff.enemies[i].hidden ) {
 	
 			DoubleSprite *curr_enemy = &(enemy_buff.enemies[i]);
-
-			// hit area is hardcoded here for now
-			u32 fish_hit_area = 4;
-			u32 worm_hit_area = 4;
 			
+			// works with u32 'cause we only test stuff on screen
 			u32 rect1_x = spriteGetCollisionPosX( worm ) - worm_hit_area;
 			u32 rect1_y = spriteGetCollisionPosY( worm ) - worm_hit_area;
 			u32 rect1_w = worm_hit_area*2;
@@ -218,4 +222,55 @@ bool enemybufferDoHitTest( Sprite *worm ) {
 	}
 
 	return false;
+}
+
+
+// hack 'cause I still didn't get a worm object together
+static inline u32 s_GetWormHitPosX( Sprite *worm ) {
+	return worm->pos_x + 3;
+}
+static inline u32 s_GetWormHitPosY( Sprite *worm ) {
+	return worm->pos_y + 9;
+}
+
+u32 enemybufferDoSlapTest( Sprite *worm ) {
+	
+	// hardcoded until objects happen
+	u32 worm_hit_area = 5;
+	u32 fish_h_hit_area = 11;
+	u32 fish_x_hit_area = 5;
+			
+	// works with u32 'cause we only test stuff on screen
+	u32 rect1_x = s_GetWormHitPosX( worm ) - worm_hit_area;
+	u32 rect1_w = 2*worm_hit_area;
+	u32 rect1_y = s_GetWormHitPosY( worm ) - worm_hit_area;
+	u32 rect1_h = 2*worm_hit_area;
+
+	for(u32 i = 0; i < 5; i++ ) {
+		if( !enemy_buff.enemies[i].hidden ) {
+	
+			DoubleSprite *curr_enemy = &(enemy_buff.enemies[i]);
+		
+			u32 rect2_x = curr_enemy->pos_x+16 - fish_h_hit_area;
+			u32 rect2_y = curr_enemy->pos_y+8 - fish_x_hit_area;
+			u32 rect2_w = fish_h_hit_area*2;
+			u32 rect2_h = fish_x_hit_area*2;
+
+			// AABB - this isn't need any fixed point
+			if(	rect1_x < rect2_x + rect2_w &&
+				rect1_x + rect1_w > rect2_x &&
+				rect1_y < rect2_y + rect2_h &&
+				rect1_y + rect1_h > rect2_y ) {
+
+				// SMACK!!
+				doublespriteSetHidden( curr_enemy, true );
+				return enemy_buff.enemy_kind[i];
+
+			}
+		
+		
+		}
+	}
+
+	return 255;
 }
