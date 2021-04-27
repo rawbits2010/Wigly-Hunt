@@ -20,7 +20,7 @@ static u32 start_idx[] = 		{  6,  0,  5,  8,  0 };
 static u32 curr_arrow_theta;
 
 static inline u32 getArrowBasePosX() {
-	return 240/2 - (7*8)/2;
+	return 240/2 - (7*8)/2 - (7*8);
 }
 
 void titlescreenInit() {
@@ -41,7 +41,7 @@ void titlescreenInit() {
 	
 	// > START
 	u32 text_pos_x = getArrowBasePosX();
-	u32 text_pos_y = 160/2 - 8/2;
+	u32 text_pos_y = 160/2 - 8/2 + (3*8);
 
 	// arrow
 	spritebufferCreateLetter(&arrow, 22);
@@ -63,8 +63,8 @@ void titlescreenInit() {
 	}
 
 	// top score:  ------
-	text_pos_x = 88;
-	text_pos_y = 120;
+	text_pos_x = 16;
+	text_pos_y = 128;
 	for(u32 i = 0; i < 17; i++) {
 
 		spritebufferCreateLetter(&top_score_text[i], top_score_idx[i]);

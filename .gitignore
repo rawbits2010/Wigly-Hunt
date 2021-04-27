@@ -2,3 +2,6 @@
 build
 .vscode/c_cpp_properties.json
 .vscode/settings.json
+/.vscode
+/fish_1.png
+/LD48_48.sav

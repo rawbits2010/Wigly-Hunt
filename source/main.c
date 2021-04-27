@@ -391,6 +391,26 @@ if(!win) {
 	curr_screen = TITLE_SCREEN;
 }
 
+// NOTE: straight from the Tonc tutorial, only notes are changed. Added in the last 5 mins..
+void note_play(int note, int octave)
+{
+	REG_SND1FREQ = SFREQ_RESET | SND_RATE(note, octave);
+}
+
+void sos()
+{
+	const u8 lens[]= { 2,3,1,2,1,1,4 };
+	const u8 notes[]= { 0x03, 0x07, 0x02, 0x02, 0x05, 0x06, 0x08 };
+	int ii;
+	for(ii=0; ii<7; ii++)
+	{
+		// Play the actual note
+	
+		note_play(notes[ii]&15, notes[ii]>>4);
+		VBlankIntrDelay(8*lens[ii]);
+	}
+}
+
 int main() {
 
 	// accumulate score in this
@@ -416,6 +436,22 @@ int main() {
 	// enable isr switchboard and VBlank interrupt
 	irq_init(NULL);
 	irq_add(II_VBLANK, NULL);
+
+// NOTE: straight from the Tonc tutorial, only notes are changed. Added in the last 5 mins..
+	// turn sound on
+	REG_SNDSTAT= SSTAT_ENABLE;
+	// snd1 on left/right ; both full volume
+	REG_SNDDMGCNT = SDMG_BUILD_LR(SDMG_SQR1, 7);
+	// DMG ratio to 100%
+	REG_SNDDSCNT= SDS_DMG100;
+
+	// no sweep
+	REG_SND1SWEEP= SSW_OFF;
+	// envelope: vol=12, decay, max step time (7) ; 50% duty
+	REG_SND1CNT= SSQR_ENV_BUILD(12, 0, 7) | SSQR_DUTY1_2;
+	REG_SND1FREQ= 0;
+
+	sos();
 
 	// dirty basic screen switcher
 	curr_screen = TITLE_SCREEN;
