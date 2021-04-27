@@ -41,7 +41,7 @@ extern void enemybufferSpawnEnemy(u32 kind, u32 pos_x, u32 movement );
 extern void enemybufferUpdateEnemies( Sprite *worm );
 
 // did a fish got us?
-extern bool enemybufferDoHitTest( Sprite *worm );
+extern u32 enemybufferDoHitTest( Sprite *worm );
 // did we hit a fish - returns the kind of fish or 255 when no hit
 extern u32 enemybufferDoSlapTest( Sprite *worm );
 

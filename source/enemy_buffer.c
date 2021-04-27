@@ -325,7 +325,7 @@ void enemybufferUpdateEnemies( Sprite *worm ) {
 }
 
 
-bool enemybufferDoHitTest( Sprite *worm ) {
+u32 enemybufferDoHitTest( Sprite *worm ) {
 
 	// hit area is hardcoded here for now
 	u32 fish_hit_area = 3;
@@ -354,14 +354,14 @@ bool enemybufferDoHitTest( Sprite *worm ) {
 				rect1_y + rect1_h > rect2_y ) {
 
 				// You are dead Jim!
-				return true;
+				return enemy_buff.enemy_kind[i];
 
 			}
 
 		}
 	}
 
-	return false;
+	return 255;
 }
 
 

@@ -118,6 +118,9 @@ u32 curr_screen;
 #define DEATH_SCREEN 2
 #define END_SCREEN 3
 
+u32 killed_by;
+u32 killed_at_depth;
+
 void doTitleScreen( u32 last_run_score, u32 top_score ) {
 
 	REG_DISPCNT= DCNT_MODE0 | DCNT_BG0 | DCNT_OBJ | DCNT_OBJ_1D;
@@ -306,10 +309,15 @@ void doGameScreen( u32 *run_score ) {
 		// end condition checks!!!
 
 		// hittest
-		if( enemybufferDoHitTest( &worm ) ) {
+		u32 kind = enemybufferDoHitTest( &worm );
+		if( kind != 255 ) {
 			enemybufferHideFish();
 			spriteSetHidden(&worm, true);
 			spritebufferUpload(128);
+
+killed_by = kind;
+killed_at_depth = deepness;
+
 			break; // You are dead Jim!
 		}
 
@@ -345,16 +353,36 @@ void doEndScreen( bool win ) {
 
 	endscreenReset( win );
 
+// the who killed you when 
+if(!win) {
+			// set fish color on death screen
+			u32 fishpalstart = (16*2) + ((killed_by-1)*2);
+			u32 deadpalstart = 1;
+			pal_bg_mem[deadpalstart] = pal_obj_mem[fishpalstart+(2)];
+			pal_bg_mem[deadpalstart+1] = pal_obj_mem[fishpalstart+(3)];
+			pal_bg_mem[deadpalstart+2] = pal_obj_mem[fishpalstart+(4)];
+
+			// set bg color to depth color
+			pal_bg_mem[0] = pal_bg_mem[16*3 + (15-killed_at_depth)];
+}
+			u32 delay = 0;
+			bool start = false;
+
 	do {
 
 		VBlankIntrWait();
 		frame_count++;
 		
+		if( delay <= 3*60) {
+			delay++;
+		} else {
+			start = endscreenHandleInput();
+		}
 		// update stuff
 		//endscreenUpdate();
 
 	// check for start / a
-	} while( !endscreenHandleInput() );
+	} while( !start );
 
 	curr_screen = TITLE_SCREEN;
 }
