@@ -376,7 +376,11 @@ if(!win) {
 		if( delay <= 3*60) {
 			delay++;
 		} else {
+			titlescreenUnhideStart();
+			titlescreenUpdate();
 			start = endscreenHandleInput();
+		// finalize
+		spritebufferUpload(128);
 		}
 		// update stuff
 		//endscreenUpdate();

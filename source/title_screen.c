@@ -102,6 +102,14 @@ void titlescreenUpdate() {
 
 }
 
+void titlescreenUnhideStart() {
+	obj_unhide(arrow.obj_attr, ATTR1_SIZE_8);
+	for(u32 i = 0; i < 5; i++) {
+		obj_unhide(start_text[i].obj_attr, ATTR1_SIZE_8);
+	}
+
+}
+
 void titlescreenReset( u32 top_score, u32 last_score ) {
 	pal_bg_mem[0] = 0;
 
@@ -109,10 +117,7 @@ void titlescreenReset( u32 top_score, u32 last_score ) {
 	memcpy(pal_bg_mem, titlePal, 16*2);
 	memcpy(&tile_mem[0][0], titleTiles, titleTilesLen);
 
-	obj_unhide(arrow.obj_attr, ATTR1_SIZE_8);
-	for(u32 i = 0; i < 5; i++) {
-		obj_unhide(start_text[i].obj_attr, ATTR1_SIZE_8);
-	}
+	titlescreenUnhideStart();
 	for(u32 i = 0; i < 17; i++) {
 		obj_unhide(top_score_text[i].obj_attr, ATTR1_SIZE_8);
 		obj_unhide(last_score_text[i].obj_attr, ATTR1_SIZE_8);

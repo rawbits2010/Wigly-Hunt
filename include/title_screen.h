@@ -15,4 +15,5 @@ extern void titlescreenReset( u32 top_score, u32 last_score );
 
 extern bool titlescreenHandleInput();
 
+extern void titlescreenUnhideStart();
 #endif // TITLE_SCREEN_H
